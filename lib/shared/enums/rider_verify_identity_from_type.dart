@@ -1,0 +1,4 @@
+enum RiderVerifyIdentityFromType{
+  verify,
+  profile
+}

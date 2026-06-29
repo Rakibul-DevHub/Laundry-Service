@@ -1,0 +1,78 @@
+name: drop_n_fresh
+description: "A Service Provider App"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  # Date Formatter
+  intl: ^0.20.2
+  # Advanced Network (http)
+  dio: ^5.9.0
+  # Secure Key value store
+  flutter_secure_storage: ^10.0.0
+  # Annotation
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+  # state management
+  flutter_riverpod: ^2.6.1
+  # navigation management
+  go_router: ^17.0.1
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.2.3
+  shimmer: ^3.0.0
+  file_picker: ^10.3.8
+  image_picker: ^1.2.1
+  flutter_html: ^3.0.0
+  flutter_staggered_grid_view: ^0.7.0
+  permission_handler: ^12.0.1
+  google_maps_flutter: ^2.15.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  webview_flutter: ^4.4.2
+  webview_flutter_android: ^3.16.0
+  webview_flutter_wkwebview: ^3.13.0
+  qr_flutter: ^4.1.0
+  video_player: ^2.11.1
+  carousel_slider: ^5.1.2
+  mobile_scanner: ^7.2.0
+  firebase_core: ^4.6.0
+  firebase_messaging: ^16.1.3
+  flutter_local_notifications: ^21.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.10.4
+  freezed: ^3.2.4
+  json_serializable: ^6.11.3
+  flutter_launcher_icons: "^0.14.4"
+  change_app_package_name: ^1.5.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/svg/
+    - assets/svg/orders/
+    - assets/svg/instructions/
+    - assets/svg/bottom_nav/user/
+    - assets/svg/bottom_nav/rider/
+    - assets/svg/bottom_nav/provider/
+    - assets/web_p/
+    - assets/web_p/instructions/
+    - assets/gif/
+
+  # fonts:
+  #   - family: Schuyler
+  #     fonts:
+  #       - asset: fonts/Schuyler-Regular.ttf
+  #       - asset: fonts/Schuyler-Italic.ttf
+  #         style: italic

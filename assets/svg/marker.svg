@@ -1,0 +1,13 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Glow -->
+  <circle cx="24" cy="24" r="22" fill="#A514FF" opacity="0.3"/>
+
+  <!-- Marker Body -->
+  <path d="M24 4C18.477 4 14 8.477 14 14C14 22 24 44 24 44C24 44 34 22 34 14C34 8.477 29.523 4 24 4Z" fill="#A514FF"/>
+
+  <!-- Inner Circle -->
+  <circle cx="24" cy="14" r="8" fill="white"/>
+
+  <!-- Center Dot -->
+  <circle cx="24" cy="14" r="4" fill="#A514FF"/>
+</svg>

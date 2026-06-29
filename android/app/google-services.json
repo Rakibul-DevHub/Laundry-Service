@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "596126111241",
+    "project_id": "drop-n-fresh-prod",
+    "storage_bucket": "drop-n-fresh-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:596126111241:android:bfe2dbf155a8ba95250ad8",
+        "android_client_info": {
+          "package_name": "com.dropnfresh.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1mw6kKfxOweT3EgL148_HPsqTBf8zmkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:596126111241:android:00c97fda74ee233a250ad8",
+        "android_client_info": {
+          "package_name": "com.example.drop_n_fresh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1mw6kKfxOweT3EgL148_HPsqTBf8zmkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
