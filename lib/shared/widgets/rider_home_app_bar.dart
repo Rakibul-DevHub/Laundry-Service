@@ -16,7 +16,8 @@ import 'shimmer/app_bar_info_shimmer.dart';
 
 class RiderHomeAppBar extends StatelessWidget {
   final bool isChatVisible;
-  const RiderHomeAppBar({super.key, this.isChatVisible = false});
+
+  const RiderHomeAppBar({super.key, this.isChatVisible = true});
 
   @override
   Widget build(BuildContext context) {
@@ -72,28 +73,31 @@ class RiderHomeAppBar extends StatelessWidget {
             },
           ),
           const Spacer(),
+
           if (isChatVisible)
-            InkWell(
-              onTap: () => context.push(RoutePaths.conversations),
-              child: Container(
-                padding: const EdgeInsets.all(4.0),
-                decoration: BoxDecoration(
-                  color: AppColors.paste50,
-                  border: Border.all(color: AppColors.body, width: 1.0),
-                  borderRadius: BorderRadius.circular(
-                    AppSizes.borderRadiusMd,
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: InkWell(
+                onTap: () => context.push(RoutePaths.conversations),
+                child: Container(
+                  padding: const EdgeInsets.all(4.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.paste50,
+                    border: Border.all(color: AppColors.body, width: 1.0),
+                    borderRadius: BorderRadius.circular(
+                      AppSizes.borderRadiusMd,
+                    ),
                   ),
-                ),
-                child: const AssetLoader(
-                  assetPath: AppIcons.chat,
-                  width: 24.0,
-                  height: 24.0,
+                  child: const AssetLoader(
+                    assetPath: AppIcons.chat,
+                    width: 24.0,
+                    height: 24.0,
+                  ),
                 ),
               ),
             ),
 
-          // Online Status (actions)
-          if (!isChatVisible) const RiderOnlineStatus(),
+          const RiderOnlineStatus(),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:drop_n_fresh/shared/widgets/asset_loader.dart';
 import 'package:drop_n_fresh/shared/widgets/dashed_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/colors.dart';
 import '../models/user_order_model.dart';
@@ -40,7 +41,7 @@ class UserOrderItem extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Header: Provider + Service Info + Status
+            // Header: Provider + Service Info + Status + Message Button
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -55,25 +56,19 @@ class UserOrderItem extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
 
+                // Provider Name & Status
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              order.provider.fullName,
-                              style: AppTextStyles.paragraph1.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        order.provider.fullName,
+                        style: AppTextStyles.paragraph1.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -95,6 +90,27 @@ class UserOrderItem extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                IconButton(
+                  onPressed: () {
+                    if (context.mounted) {
+                      context.pushNamed(
+                        'chat',
+                        extra: <String, dynamic>{
+                          'conversationId': '',
+                          'receiverId': order.provider.id,
+                          'conversation': null,
+                        },
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  color: AppColors.primary,
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.all(8),
                   ),
                 ),
               ],

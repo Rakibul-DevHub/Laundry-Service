@@ -21,7 +21,15 @@ class ChatNotifier extends AutoDisposeFamilyNotifier<ChatState, String> {
   ChatState build(String conversationId) {
     _apiClient = ref.read(apiClientProvider);
     _currentConversationId = conversationId;
-    Future<dynamic>.microtask(() => _fetchMessages());
+
+    if (_currentConversationId.isEmpty) {
+      return const ChatState(isLoading: false, messages: <MessageModel>[]);
+    }
+
+    Future<void>.delayed(Duration.zero, () {
+      _fetchMessages();
+    });
+
     return const ChatState(isLoading: true);
   }
 
