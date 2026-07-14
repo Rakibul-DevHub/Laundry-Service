@@ -35,6 +35,9 @@ class RoutePaths {
   static const String aboutUs = '/settings/about-us';
   static const String settings = '/settings';
 
+  static const String providerDocUpload = '$provider/provider-doc-upload';
+  static const String providerDocUploadNoRole = 'provider-doc-upload';
+
   // Verify Rider
   static const String verifyRiderHome = '$rider/profile/verify-rider-home';
   static const String verifyRiderHomeNoRole = 'profile/verify-rider-home';

@@ -1,4 +1,5 @@
 import 'package:drop_n_fresh/features/orders/provider/models/order_status_type.dart';
+import 'package:drop_n_fresh/features/profile/screens/provider/provider_documents_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,6 +71,14 @@ class ProviderRoutes {
         path: RoutePaths.providerBusinessHoursNoRole,
         builder: (BuildContext context, GoRouterState state) {
           return const ProviderBusinessHoursScreen();
+        },
+      ),
+
+
+      GoRoute(
+        path: RoutePaths.providerDocUploadNoRole,
+        builder: (BuildContext context, GoRouterState state) {
+          return const ProviderDocumentsScreen();
         },
       ),
     ],
