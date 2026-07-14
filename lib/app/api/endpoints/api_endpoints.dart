@@ -151,4 +151,10 @@ class ApiEndpoints {
   static const String notifications = '${AppConstants.baseUrl}/notifications';
   static const String fcmToken =
       '${AppConstants.baseUrl}/notifications/fcm-token';
+
+
+  //provider documents upload
+
+static const String submitProviderDocs = '${AppConstants.baseUrl}/profile/provider/submit';
+static const String getProviderDocs = '${AppConstants.baseUrl}/profile/provider/documents';
 }

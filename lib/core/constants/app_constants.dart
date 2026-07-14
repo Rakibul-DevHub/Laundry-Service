@@ -7,15 +7,15 @@ class AppConstants {
   //live server: https://api.dropnfreshapp.com
 
   static const String baseUrl =
-      'https://zrz9f9td-8010.inc1.devtunnels.ms/api/v1';
+      'https://api.dropnfreshapp.com/api/v1';
   //  Base URL for images
   // static const String imageBaseUrl = 'https://api.dropnfreshapp.com/';
   static const String imageBaseUrl =
-      'https://zrz9f9td-8010.inc1.devtunnels.ms/';
+      'https://api.dropnfreshapp.com/';
   // Base URL for socket connection
   // static const String socketBaseUrl = 'https://api.dropnfreshapp.com';
   static const String socketBaseUrl =
-      'https://zrz9f9td-8010.inc1.devtunnels.ms/api/v1';
+      'https://api.dropnfreshapp.com/api/v1';
   // Timeout durations
   static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;

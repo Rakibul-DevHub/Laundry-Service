@@ -78,6 +78,14 @@ class ProviderProfileScreen extends StatelessWidget {
                           context.push(RoutePaths.providerProfileInfo);
                         },
                         title: 'Your Profile',
+                        isDivider: true,
+                      ),
+                      ProfileItem(
+                        isDivider: false,
+                        onTapCallback: () {
+                          context.push(RoutePaths.providerDocUpload);
+                        },
+                        title: 'Provider Documents',
                       ),
                     ],
                   ),
