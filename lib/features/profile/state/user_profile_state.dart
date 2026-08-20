@@ -46,7 +46,6 @@ class UserProfileState {
       nameError == null &&
       phoneError == null &&
       locationError == null &&
-      gender != null &&
       name.isNotEmpty &&
       phone.isNotEmpty &&
       location.isNotEmpty;

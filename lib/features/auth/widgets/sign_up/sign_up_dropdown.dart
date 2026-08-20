@@ -39,7 +39,9 @@ class SignUpDropdownField extends ConsumerWidget {
       onChanged: (String? v) => onChanged(ref, v ?? items.first),
       decoration: InputDecoration(
         labelText: labelText,
-        border: const OutlineInputBorder(),
+        border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12))
+        ),
       ),
     );
   }

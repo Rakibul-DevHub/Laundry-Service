@@ -123,6 +123,7 @@ class UserLocationNotifier extends AutoDisposeNotifier<UserLocationState> {
       Toast.showSuccess('Location saved successfully');
 
       await fetchSavedLocations();
+      ref.read(defaultLocationProvider.notifier).refresh();
 
       state = state.copyWith(isSaving: false);
       return true;

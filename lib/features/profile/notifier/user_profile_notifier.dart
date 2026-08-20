@@ -43,10 +43,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
       setName(response.data.fullName);
       setPhone(response.data.phoneNumber ?? '');
       setLocation(response.data.address.address);
-      final Gender? gender = Gender.fromString(response.data.profile?.gender);
-      if (gender != null) {
-        setGender(gender);
-      }
     } catch (e) {
       AppLogger().e(e.toString(), error: e);
       state = state.copyWith(
@@ -125,7 +121,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
     validateName();
     validatePhone();
     validateLocation();
-    validateGender();
 
     if (!state.isValid) {
       return;
@@ -142,7 +137,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
           "fullName": state.name,
           "phoneNumber": state.phone,
           "address": state.location,
-          "gender": state.gender?.name,
         },
       );
       state = state.copyWith(profileValue: AsyncData<User>(response.data));

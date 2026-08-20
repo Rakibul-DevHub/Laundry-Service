@@ -8,7 +8,6 @@ import '../../../../core/config/colors.dart';
 import '../../../../core/config/icons.dart';
 import '../../../../core/config/sizes.dart';
 import '../../../../core/utils/app_logger.dart';
-import '../../../../shared/enums/gender.dart';
 import '../../../../shared/models/user_model.dart';
 import '../../../../shared/widgets/app_elevated_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
@@ -56,29 +55,33 @@ class UserProfileEditScreen extends StatelessWidget {
                             (UserProfileState state) => state.profileValue,
                           ),
                         );
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: <Widget>[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: AssetLoader(
-                                assetPath:
-                                    imageFile ?? profile.value?.profilePicture,
-                                shape: BoxShape.rectangle,
-                                width: 100,
-                                height: 100,
+                        return GestureDetector(
+                          onTap: isProfileSubmitting
+                              ? null
+                              : () => _pickImage(context, ref),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: <Widget>[
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: AssetLoader(
+                                  assetPath: imageFile ??
+                                      profile.value?.profilePicture,
+                                  shape: BoxShape.rectangle,
+                                  width: 100,
+                                  height: 100,
+                                ),
                               ),
-                            ),
-                            Positioned(
-                              bottom: -12,
-                              right: 35,
-                              child: GestureDetector(
-                                onTap: () => isProfileSubmitting
-                                    ? () {}
-                                    : _pickImage(context, ref),
+                              Positioned(
+                                bottom: -12,
+                                right: 35,
                                 child: isProfileSubmitting
-                                    ? const Center(
-                                        child: CircularProgressIndicator(),
+                                    ? const SizedBox(
+                                        width: 32,
+                                        height: 32,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : const AssetLoader(
                                         assetPath: AppIcons.camera,
@@ -86,8 +89,8 @@ class UserProfileEditScreen extends StatelessWidget {
                                         height: 32,
                                       ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                 ),
@@ -103,14 +106,6 @@ class UserProfileEditScreen extends StatelessWidget {
 
                 // Location
                 const _ProfileLocationField(),
-                const SizedBox(height: AppSizes.spaceBetweenItems),
-
-                // // Age
-                // const ProfileAgeField(),
-                // const SizedBox(height: AppSizes.spaceBetweenItems),
-
-                // Gender
-                const _ProfileGenderField(),
                 const SizedBox(height: AppSizes.spaceBetweenSections),
                 const _ProfileSaveButton(),
                 const SizedBox(height: AppSizes.spaceBetweenSections),
@@ -234,35 +229,6 @@ class _ProfileLocationField extends ConsumerWidget {
           ref.read(riderProfileProvider.notifier).validateLocation(),
       onUnfocus: () =>
           ref.read(riderProfileProvider.notifier).validateLocation(),
-    );
-  }
-}
-
-class _ProfileGenderField extends ConsumerWidget {
-  const _ProfileGenderField();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Gender? gender = ref.watch(
-      userProfileProvider.select((UserProfileState state) => state.gender),
-    );
-
-    return DropdownButtonFormField<Gender>(
-      initialValue: gender,
-      items: const <DropdownMenuItem<Gender>>[
-        DropdownMenuItem<Gender>(value: Gender.male, child: Text('Male')),
-        DropdownMenuItem<Gender>(value: Gender.female, child: Text('Female')),
-        DropdownMenuItem<Gender>(value: Gender.others, child: Text('Others')),
-      ],
-      onChanged: (Gender? value) {
-        if (value != null) {
-          ref.read(userProfileProvider.notifier).setGender(value);
-        }
-      },
-      decoration: InputDecoration(
-        labelText: 'Gender',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      ),
     );
   }
 }

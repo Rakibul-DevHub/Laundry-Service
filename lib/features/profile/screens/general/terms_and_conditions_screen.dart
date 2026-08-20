@@ -17,6 +17,7 @@ class TermsAndConditionsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const CustomAppBar(
         showBackBtn: true,
+        title: 'Terms & Conditions',
       ),
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -44,7 +45,7 @@ class TermsAndConditionsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () =>
-                ref.read(aboutUsProvider.notifier).refreshContent(),
+                ref.read(termsAndConditionsProvider.notifier).refreshContent(),
             child: const Text('Retry'),
           ),
         ],
@@ -60,6 +61,7 @@ class TermsAndConditionsScreen extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Html(
         data: htmlContent,
       ),

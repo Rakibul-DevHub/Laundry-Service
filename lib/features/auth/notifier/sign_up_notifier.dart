@@ -43,13 +43,24 @@ class SignUpNotifier extends AutoDisposeFamilyNotifier<SignUpState, Role> {
   }
 
   // === USER FIELDS ===
-  void setUserName(String name) {
-    state = state.copyWith(userName: name, userNameError: null);
+  void setUserFirstName(String name) {
+    state = state.copyWith(userFirstName: name, userFirstNameError: null);
   }
 
-  void userNameValidate() {
-    final String? error = state.userName.isEmpty ? 'Name is required' : null;
-    state = state.copyWith(userNameError: error);
+  void userFirstNameValidate() {
+    final String? error =
+        state.userFirstName.trim().isEmpty ? 'First name is required' : null;
+    state = state.copyWith(userFirstNameError: error);
+  }
+
+  void setUserLastName(String name) {
+    state = state.copyWith(userLastName: name, userLastNameError: null);
+  }
+
+  void userLastNameValidate() {
+    final String? error =
+        state.userLastName.trim().isEmpty ? 'Last name is required' : null;
+    state = state.copyWith(userLastNameError: error);
   }
 
   void setUserPhone(String phone) {
@@ -177,7 +188,8 @@ class SignUpNotifier extends AutoDisposeFamilyNotifier<SignUpState, Role> {
     // Validate all fields based on role
     switch (state.role) {
       case Role.user:
-        userNameValidate();
+        userFirstNameValidate();
+        userLastNameValidate();
         userPhoneValidate();
         emailValidate();
         userLocationValidate();
@@ -209,12 +221,13 @@ class SignUpNotifier extends AutoDisposeFamilyNotifier<SignUpState, Role> {
       switch (state.role) {
         case Role.user:
           data.addAll(<String, Object?>{
-            "fullName": state.userName,
+            "firstName": state.userFirstName.trim(),
+            "lastName": state.userLastName.trim(),
+            "fullName": state.userFullName,
             "phoneNumber": state.userPhone,
             "email": state.email,
             "password": state.password,
             "address": state.userLocation,
-            "gender": state.userGender?.toLowerCase(),
             "dateOfBirth": state.userDateOfBirth?.formattedDate,
             "acceptTerms": true, // Required
             "role": "user",

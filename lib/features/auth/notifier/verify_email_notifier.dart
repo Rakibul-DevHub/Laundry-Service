@@ -148,7 +148,8 @@ class VerifyEmailNotifier extends AutoDisposeNotifier<VerifyEmailState> {
               switch (role) {
                 case Role.user:
                   _appRouter.go(
-                    RoutePaths.user,
+                    RoutePaths.userAddressAdd,
+                    extra: true,
                   );
                   break;
                 case Role.rider:

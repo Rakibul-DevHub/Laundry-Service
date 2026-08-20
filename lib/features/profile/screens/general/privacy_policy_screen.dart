@@ -17,6 +17,7 @@ class PrivacyPolicyScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const CustomAppBar(
         showBackBtn: true,
+        title: 'Privacy Policy',
       ),
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -44,7 +45,7 @@ class PrivacyPolicyScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () =>
-                ref.read(aboutUsProvider.notifier).refreshContent(),
+                ref.read(privacyPolicyProvider.notifier).refreshContent(),
             child: const Text('Retry'),
           ),
         ],
@@ -60,6 +61,7 @@ class PrivacyPolicyScreen extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Html(
         data: htmlContent,
       ),

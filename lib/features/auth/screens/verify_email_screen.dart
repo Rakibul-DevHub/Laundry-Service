@@ -99,10 +99,14 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 counterText: '',
+                                isCollapsed: true,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
                               ),
                               maxLength: 1,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
+                              textAlignVertical: TextAlignVertical.center,
                               onChanged: (String value) {
                                 if (value.length == 1) {
                                   ref
@@ -117,7 +121,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                                       );
                                 }
                               },
-                              style: AppTextStyles.heading1,
+                              style: AppTextStyles.heading3,
                             ),
                           ),
                         );

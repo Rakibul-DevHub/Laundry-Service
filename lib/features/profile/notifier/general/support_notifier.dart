@@ -1,7 +1,6 @@
-// ignore_for_file: avoid_dynamic_calls
-
 import 'package:drop_n_fresh/app/api/api_client.dart';
 import 'package:drop_n_fresh/app/providers/app_providers.dart';
+import 'package:drop_n_fresh/core/config/legal_content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/general/support_state.dart';
@@ -26,13 +25,19 @@ class SupportNotifier extends AutoDisposeNotifier<SupportState> {
             endpoint: ApiEndpoints.support,
           );
 
+      final dynamic data = response['data'];
+      final String? remote = data is Map<String, dynamic>
+          ? data['content'] as String?
+          : null;
       state = state.copyWith(
-        htmlContent: response['data']['content'] as String,
+        htmlContent: LegalContent.looksLikePlaceholder(remote)
+            ? LegalContent.support
+            : remote!,
         isLoading: false,
       );
     } catch (e) {
       state = state.copyWith(
-        error: 'Failed to load support content',
+        htmlContent: LegalContent.support,
         isLoading: false,
       );
     }

@@ -97,8 +97,10 @@ class AppStrings {
   static const String verifyEmailBtn = "Verify Email";
   static const String signUPEmail = "Email*";
   static const String signUPName = "Name*";
+  static const String signUPFirstName = "First Name*";
+  static const String signUPLastName = "Last Name*";
   static const String signUPPhone = "Phone*";
-  static const String signUPLocation = "Location*";
+  static const String signUPLocation = "Address*";
   static const String signUPGender = "Gender*";
   static const String signUPPassword = "Password*";
   static const String signUPBusinessName = "Business Name*";
