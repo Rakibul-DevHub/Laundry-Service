@@ -2,6 +2,7 @@
 
 // ignore_for_file: always_specify_types
 
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 import 'jobs_check_point_type.dart';
@@ -125,7 +126,8 @@ class JobsDetailsModel {
       deliveryPayout: _parseCentsToDollars(data['deliveryPayout']),
       pickupPayout: _parseCentsToDollars(data['pickupPayout']),
       date: _parseDateTime(data['createdAt']) ?? DateTime.now(),
-      customerProfile: userJson['profilePicture'] as String? ?? '',
+      customerProfile:
+          AppConstants.resolveMediaUrl(userJson['profilePicture']) ?? '',
       customerName: userJson['fullName'] as String? ?? 'Unknown',
       customerPhone: userJson['phoneNumber'] as String? ?? '',
       pickupLocation: pickupLocJson?['address'] as String? ?? '',
@@ -155,7 +157,8 @@ class JobsDetailsModel {
               as String? ??
           providerJson['fullName'] as String? ??
           '',
-      providerProfile: providerJson['profilePicture'] as String? ?? '',
+      providerProfile:
+          AppConstants.resolveMediaUrl(providerJson['profilePicture']) ?? '',
       bags: bagsJson
           .map((b) => BagInfo.fromApi(b as Map<String, dynamic>))
           .toList(),

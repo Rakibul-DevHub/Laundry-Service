@@ -2,6 +2,7 @@
 
 // ignore_for_file: always_specify_types
 
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 // ============================================================================
@@ -450,7 +451,7 @@ class UserInfo {
       fullName: json['fullName'] as String? ?? '',
       email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
-      profilePicture: json['profilePicture'] as String?,
+      profilePicture: AppConstants.resolveMediaUrl(json['profilePicture']),
     );
   }
 }
@@ -476,7 +477,7 @@ class ProviderInfo {
       id: json['_id'] as String? ?? '',
       fullName: json['fullName'] as String? ?? '',
       businessName: businessInfo['businessName'] as String? ?? '',
-      profilePicture: json['profilePicture'] as String?,
+      profilePicture: AppConstants.resolveMediaUrl(json['profilePicture']),
     );
   }
 }

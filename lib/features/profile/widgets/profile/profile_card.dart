@@ -30,6 +30,7 @@ class ProfileCard extends StatelessWidget {
               assetPath: profile.profilePicture,
               width: 56,
               height: 56,
+              fit: BoxFit.cover,
               shape: BoxShape.rectangle,
             ),
           ),

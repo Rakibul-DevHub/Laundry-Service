@@ -66,6 +66,7 @@ class ProviderProfileEditScreen extends StatelessWidget {
                                 shape: BoxShape.rectangle,
                                 width: 100,
                                 height: 100,
+                                fit: BoxFit.cover,
                               ),
                             ),
                             Positioned(
@@ -145,12 +146,19 @@ class _ProfileSaveButton extends ConsumerWidget {
         (ProviderProfileState state) => state.isSubmitting,
       ),
     );
+    final bool isProfileSubmitting = ref.watch(
+      providerProfileProvider.select(
+        (ProviderProfileState state) => state.isProfileSubmitting,
+      ),
+    );
+    final bool canSave =
+        isValid && !isSubmitting && !isProfileSubmitting;
 
     return AppElevatedButton(
-      onPressed: isSubmitting || !isValid
-          ? null
-          : () => ref.read(providerProfileProvider.notifier).saveProfile(),
-      isEnabled: isValid,
+      onPressed: canSave
+          ? () => ref.read(providerProfileProvider.notifier).saveProfile()
+          : null,
+      isEnabled: canSave,
       isLoading: isSubmitting,
       label: 'Save',
     );

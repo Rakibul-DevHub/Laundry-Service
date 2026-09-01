@@ -67,6 +67,7 @@ class RiderProfileEditScreen extends StatelessWidget {
                                 shape: BoxShape.rectangle,
                                 width: 100,
                                 height: 100,
+                                fit: BoxFit.cover,
                               ),
                             ),
                             Positioned(
@@ -146,12 +147,19 @@ class _ProfileSaveButton extends ConsumerWidget {
         (RiderProfileState state) => state.isSubmitting,
       ),
     );
+    final bool isProfileSubmitting = ref.watch(
+      riderProfileProvider.select(
+        (RiderProfileState state) => state.isProfileSubmitting,
+      ),
+    );
+    final bool canSave =
+        isValid && !isSubmitting && !isProfileSubmitting;
 
     return AppElevatedButton(
-      onPressed: isSubmitting || !isValid
-          ? null
-          : () => ref.read(riderProfileProvider.notifier).saveProfile(),
-      isEnabled: isValid,
+      onPressed: canSave
+          ? () => ref.read(riderProfileProvider.notifier).saveProfile()
+          : null,
+      isEnabled: canSave,
       isLoading: isSubmitting,
       label: 'Save',
     );

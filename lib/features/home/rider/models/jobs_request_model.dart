@@ -3,6 +3,7 @@
 // ignore_for_file: avoid_dynamic_calls, always_specify_types
 
 import 'package:drop_n_fresh/core/config/images.dart';
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 // ============================================================================
@@ -103,7 +104,8 @@ class JobsRequestModel {
       payout: (json['deliveryPayout'] as num? ?? 0) / 100,
 
       date: DateTime.parse(json['createdAt'] as String),
-      customerProfile: userJson['profilePicture'] as String? ?? '',
+      customerProfile:
+          AppConstants.resolveMediaUrl(userJson['profilePicture']) ?? '',
       customerName: userJson['fullName'] as String? ?? 'Unknown',
       customerPhone: userJson['phoneNumber'] as String? ?? '',
       pickupLocation: pickupLocJson?['address'] as String? ?? '',

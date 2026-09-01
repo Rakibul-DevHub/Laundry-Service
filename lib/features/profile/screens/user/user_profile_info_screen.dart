@@ -31,6 +31,11 @@ class UserProfileInfoScreen extends ConsumerWidget {
         (UserProfileState value) => value.profileValue,
       ),
     );
+    final File? localImage = ref.watch(
+      userProfileProvider.select(
+        (UserProfileState value) => value.profileImage,
+      ),
+    );
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -91,9 +96,10 @@ class UserProfileInfoScreen extends ConsumerWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: AssetLoader(
-                            assetPath: data.profilePicture,
+                            assetPath: localImage ?? data.profilePicture,
                             width: 100,
                             height: 100,
+                            fit: BoxFit.cover,
                             shape: BoxShape.rectangle,
                           ),
                         ),

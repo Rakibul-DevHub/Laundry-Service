@@ -70,6 +70,7 @@ class UserProfileEditScreen extends StatelessWidget {
                                   shape: BoxShape.rectangle,
                                   width: 100,
                                   height: 100,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned(
@@ -141,12 +142,19 @@ class _ProfileSaveButton extends ConsumerWidget {
         (UserProfileState state) => state.isSubmitting,
       ),
     );
+    final bool isProfileSubmitting = ref.watch(
+      userProfileProvider.select(
+        (UserProfileState state) => state.isProfileSubmitting,
+      ),
+    );
+    final bool canSave =
+        isValid && !isSubmitting && !isProfileSubmitting;
 
     return AppElevatedButton(
-      onPressed: isSubmitting || !isValid
-          ? null
-          : () => ref.read(userProfileProvider.notifier).saveProfile(),
-      isEnabled: isValid,
+      onPressed: canSave
+          ? () => ref.read(userProfileProvider.notifier).saveProfile()
+          : null,
+      isEnabled: canSave,
       isLoading: isSubmitting,
       label: 'Save',
     );
@@ -168,11 +176,11 @@ class _ProfileNameField extends ConsumerWidget {
     return AppTextField(
       initialValue: name,
       onChanged: (String v) =>
-          ref.read(riderProfileProvider.notifier).setName(v),
+          ref.read(userProfileProvider.notifier).setName(v),
       errorText: error,
       onEditingComplete: () =>
-          ref.read(riderProfileProvider.notifier).validateName(),
-      onUnfocus: () => ref.read(riderProfileProvider.notifier).validateName(),
+          ref.read(userProfileProvider.notifier).validateName(),
+      onUnfocus: () => ref.read(userProfileProvider.notifier).validateName(),
       labelText: 'Name',
     );
   }
@@ -197,10 +205,10 @@ class _ProfilePhoneField extends ConsumerWidget {
       errorText: error,
       initialValue: phone,
       onChanged: (String v) =>
-          ref.read(riderProfileProvider.notifier).setPhone(v),
+          ref.read(userProfileProvider.notifier).setPhone(v),
       onEditingComplete: () =>
-          ref.read(riderProfileProvider.notifier).validatePhone(),
-      onUnfocus: () => ref.read(riderProfileProvider.notifier).validatePhone(),
+          ref.read(userProfileProvider.notifier).validatePhone(),
+      onUnfocus: () => ref.read(userProfileProvider.notifier).validatePhone(),
     );
   }
 }
@@ -224,11 +232,11 @@ class _ProfileLocationField extends ConsumerWidget {
       labelText: "Location",
       initialValue: location,
       onChanged: (String v) =>
-          ref.read(riderProfileProvider.notifier).setLocation(v),
+          ref.read(userProfileProvider.notifier).setLocation(v),
       onEditingComplete: () =>
-          ref.read(riderProfileProvider.notifier).validateLocation(),
+          ref.read(userProfileProvider.notifier).validateLocation(),
       onUnfocus: () =>
-          ref.read(riderProfileProvider.notifier).validateLocation(),
+          ref.read(userProfileProvider.notifier).validateLocation(),
     );
   }
 }

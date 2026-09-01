@@ -8,6 +8,7 @@ import '../../../app/api/api_client.dart';
 import '../../../app/providers/app_providers.dart';
 import '../../../app/router/app_router.dart';
 import '../../../app/toast/toast.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../shared/enums/gender.dart';
 import '../../../shared/models/user_model.dart';
 import '../model/profile_update_response.dart';
@@ -173,9 +174,9 @@ class RiderProfileNotifier extends AutoDisposeNotifier<RiderProfileState> {
         },
       );
       final User? user = state.profileValue.value?.copyWith(
-        profilePicture:
-            (response['data'] as Map<String, dynamic>)['profilePicture']
-                as String,
+        profilePicture: AppConstants.resolveMediaUrl(
+          (response['data'] as Map<String, dynamic>)['profilePicture'],
+        ),
       );
       if (user != null) {
         state = state.copyWith(profileValue: AsyncData<User>(user));

@@ -3,7 +3,30 @@ part of "../api_client.dart";
 /// [LoggingInterceptor] Interceptor for logging API requests and responses
 class LoggingInterceptor extends Interceptor {
   // Use a pretty encoder so your API payload isn't an unreadable single line
-  final JsonEncoder _encoder = const JsonEncoder.withIndent('  ');
+  final JsonEncoder _encoder = JsonEncoder.withIndent('  ', _toEncodable);
+
+  static Object? _toEncodable(dynamic object) {
+    if (object is FormData) {
+      return <String, dynamic>{
+        'fields': object.fields
+            .map(
+              (MapEntry<String, String> field) => <String, String>{
+                field.key: field.value,
+              },
+            )
+            .toList(),
+        'files': object.files
+            .map(
+              (MapEntry<String, MultipartFile> file) => <String, String?>{
+                'field': file.key,
+                'filename': file.value.filename,
+              },
+            )
+            .toList(),
+      };
+    }
+    return object.toString();
+  }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

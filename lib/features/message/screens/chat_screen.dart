@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/colors.dart';
 import '../../../../core/config/sizes.dart';
+import '../../../../shared/widgets/asset_loader.dart';
 import '../../../../shared/widgets/custom_refresh_indicator.dart';
 import '../models/conversation_model.dart';
 import '../models/message_model.dart';
@@ -551,15 +552,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       title: Row(
         children: <Widget>[
           // Profile avatar
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: userAvatar != null
-                ? NetworkImage(userAvatar)
-                : null,
-            backgroundColor: AppColors.grey200,
-            child: userAvatar == null
-                ? const Icon(Icons.person, color: AppColors.body, size: 24)
-                : null,
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: userAvatar == null || userAvatar.isEmpty
+                ? const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.grey200,
+                    child: Icon(
+                      Icons.person,
+                      color: AppColors.body,
+                      size: 24,
+                    ),
+                  )
+                : ClipOval(
+                    child: AssetLoader(
+                      assetPath: userAvatar,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           // User name

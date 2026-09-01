@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../app/router/route_paths.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_logger.dart';
 
 enum AssetType { asset, network, svgAsset, file, assetGif, networkGif, fileGif }
@@ -39,9 +40,8 @@ class AssetLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check if path is null or empty before anything else
     if (assetPath == null ||
-        (assetPath is String && (assetPath as String).isEmpty)) {
+        (assetPath is String && (assetPath as String).trim().isEmpty)) {
       return _buildPlaceholder();
     }
 
@@ -68,46 +68,78 @@ class AssetLoader extends StatelessWidget {
   /// Centralized Placeholder/Error UI
   /// Replaces the red error icons with a clean, neutral placeholder
   Widget _buildPlaceholder() {
+    final BoxShape resolvedShape = shape ?? BoxShape.rectangle;
     return Container(
       width: width,
       height: height,
       alignment: alignment,
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        // If it looks like a profile picture (width == height), make it circular
-        shape: shape ?? BoxShape.circle,
-        borderRadius: (width != height || width == null)
+        shape: resolvedShape,
+        borderRadius: resolvedShape == BoxShape.rectangle
             ? BorderRadius.circular(8)
             : null,
       ),
       child:
           errorWidget ??
           Icon(
-            Icons.image_not_supported_outlined,
+            Icons.person_outline,
             color: Colors.grey[400],
             size: width != null ? width! * 0.4 : 24,
           ),
     );
   }
 
+  Widget _fillBox(Widget child) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: child,
+    );
+  }
+
+  String? _networkUrlFor(dynamic path) {
+    if (path is File) {
+      return null;
+    }
+    if (path is String &&
+        (path.startsWith('assets/') || path.endsWith('.svg'))) {
+      return null;
+    }
+    return AppConstants.resolveMediaUrl(path);
+  }
+
   AssetType _detectAssetType(dynamic assetPath) {
-    if (assetPath is String &&
-        (assetPath.startsWith('http://') || assetPath.startsWith('https://'))) {
-      return assetPath.endsWith('.gif')
-          ? AssetType.networkGif
-          : AssetType.network;
-    }
-    if (assetPath is String && assetPath.endsWith('.svg')) {
-      return AssetType.svgAsset;
-    }
     if (assetPath is File) {
       return assetPath.path.endsWith('.gif')
           ? AssetType.fileGif
           : AssetType.file;
     }
-    return assetPath.toString().endsWith('.gif')
-        ? AssetType.assetGif
-        : AssetType.asset;
+
+    if (assetPath is String) {
+      if (assetPath.startsWith('assets/')) {
+        if (assetPath.endsWith('.svg')) {
+          return AssetType.svgAsset;
+        }
+        return assetPath.endsWith('.gif')
+            ? AssetType.assetGif
+            : AssetType.asset;
+      }
+      if (assetPath.endsWith('.svg') &&
+          !assetPath.startsWith('http://') &&
+          !assetPath.startsWith('https://')) {
+        return AssetType.svgAsset;
+      }
+    }
+
+    final String? networkUrl = _networkUrlFor(assetPath);
+    if (networkUrl != null) {
+      return networkUrl.toLowerCase().endsWith('.gif')
+          ? AssetType.networkGif
+          : AssetType.network;
+    }
+
+    return AssetType.asset;
   }
 
   Widget _buildAssetGif() {
@@ -122,25 +154,27 @@ class AssetLoader extends StatelessWidget {
   }
 
   Widget _buildNetworkGif() {
-    return Image.network(
-      assetPath as String,
-      width: width,
-      height: height,
-      fit: fit ?? BoxFit.cover,
-      alignment: alignment,
-      loadingBuilder:
-          (
-            BuildContext context,
-            Widget child,
-            ImageChunkEvent? loadingProgress,
-          ) {
-            if (loadingProgress == null) {
-              return child;
-            }
-            return loadingWidget ??
-                const Center(child: CircularProgressIndicator());
-          },
-      errorBuilder: (_, _, _) => _buildPlaceholder(),
+    return _fillBox(
+      Image.network(
+        _networkUrlFor(assetPath) ?? assetPath as String,
+        width: width,
+        height: height,
+        fit: fit ?? BoxFit.cover,
+        alignment: alignment,
+        loadingBuilder:
+            (
+              BuildContext context,
+              Widget child,
+              ImageChunkEvent? loadingProgress,
+            ) {
+              if (loadingProgress == null) {
+                return child;
+              }
+              return loadingWidget ??
+                  const Center(child: CircularProgressIndicator());
+            },
+        errorBuilder: (_, _, _) => _buildPlaceholder(),
+      ),
     );
   }
 
@@ -149,13 +183,15 @@ class AssetLoader extends StatelessWidget {
     if (!file.existsSync()) {
       return _buildPlaceholder();
     }
-    return Image.file(
-      file,
-      width: width,
-      height: height,
-      fit: fit ?? BoxFit.cover,
-      alignment: alignment,
-      errorBuilder: (_, _, _) => _buildPlaceholder(),
+    return _fillBox(
+      Image.file(
+        file,
+        width: width,
+        height: height,
+        fit: fit ?? BoxFit.cover,
+        alignment: alignment,
+        errorBuilder: (_, _, _) => _buildPlaceholder(),
+      ),
     );
   }
 
@@ -194,13 +230,35 @@ class AssetLoader extends StatelessWidget {
   }
 
   Widget _buildNetworkImage(BuildContext context) {
+    final String? imageUrl = _networkUrlFor(assetPath);
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildPlaceholder();
+    }
+    final BoxFit resolvedFit = fit ?? BoxFit.cover;
     final Widget image = CachedNetworkImage(
-      imageUrl: assetPath as String,
+      imageUrl: imageUrl,
       width: width,
       height: height,
-      fit: fit ?? BoxFit.cover,
-      color: color,
+      fit: resolvedFit,
       alignment: alignment,
+      fadeInDuration: Duration.zero,
+      fadeOutDuration: Duration.zero,
+      imageBuilder: (BuildContext context, ImageProvider<Object> provider) {
+        return _fillBox(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: provider,
+                fit: resolvedFit,
+                alignment: alignment,
+                colorFilter: color != null
+                    ? ColorFilter.mode(color!, BlendMode.srcATop)
+                    : null,
+              ),
+            ),
+          ),
+        );
+      },
       placeholder: (BuildContext context, String url) {
         return loadingWidget ??
             Shimmer.fromColors(
@@ -211,10 +269,10 @@ class AssetLoader extends StatelessWidget {
                 height: height,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  shape: BoxShape.rectangle,
-                  borderRadius: shape == BoxShape.rectangle
-                      ? BorderRadius.circular(8)
-                      : null,
+                  shape: shape ?? BoxShape.rectangle,
+                  borderRadius: shape == BoxShape.circle
+                      ? null
+                      : BorderRadius.circular(8),
                 ),
               ),
             );
@@ -230,7 +288,7 @@ class AssetLoader extends StatelessWidget {
         onTap: () {
           context.push(
             RoutePaths.imageFullScreen,
-            extra: <String, String>{"assetPath": assetPath as String},
+            extra: <String, String>{"assetPath": imageUrl},
           );
         },
         child: image,
@@ -268,18 +326,20 @@ class AssetLoader extends StatelessWidget {
       return _buildPlaceholder();
     }
 
-    return Image.file(
-      file,
-      width: width,
-      height: height,
-      fit: fit ?? BoxFit.cover,
-      color: color,
-      alignment: alignment,
-      errorBuilder:
-          (BuildContext context, Object error, StackTrace? stackTrace) {
-            AppLogger().e("File image error", error: error);
-            return _buildPlaceholder();
-          },
+    return _fillBox(
+      Image.file(
+        file,
+        width: width,
+        height: height,
+        fit: fit ?? BoxFit.cover,
+        color: color,
+        alignment: alignment,
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+              AppLogger().e("File image error", error: error);
+              return _buildPlaceholder();
+            },
+      ),
     );
   }
 }
