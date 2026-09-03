@@ -13,8 +13,10 @@ class SignUpState {
   final String? passwordError;
 
   // User-specific
-  final String userName;
-  final String? userNameError;
+  final String userFirstName;
+  final String? userFirstNameError;
+  final String userLastName;
+  final String? userLastNameError;
   final String userPhone;
   final String? userPhoneError;
   final String userLocation;
@@ -52,8 +54,10 @@ class SignUpState {
     this.emailError,
     this.password = '',
     this.passwordError,
-    this.userName = '',
-    this.userNameError,
+    this.userFirstName = '',
+    this.userFirstNameError,
+    this.userLastName = '',
+    this.userLastNameError,
     this.userPhone = '',
     this.userPhoneError,
     this.userLocation = '',
@@ -81,6 +85,9 @@ class SignUpState {
     this.isSubmitting = false,
   });
 
+  String get userFullName =>
+      '${userFirstName.trim()} ${userLastName.trim()}'.trim();
+
   bool get isValid {
     final bool commonValid = (emailError == null && email.isNotEmpty) && (passwordError == null && password.isNotEmpty);
 
@@ -92,23 +99,24 @@ class SignUpState {
     switch (role) {
       case Role.user:
         final bool userValid =
-            (userNameError == null && userName.isNotEmpty) &&
+            (userFirstNameError == null && userFirstName.trim().isNotEmpty) &&
+            (userLastNameError == null && userLastName.trim().isNotEmpty) &&
             (userPhoneError == null && userPhone.isNotEmpty) &&
             (userLocationError == null && userLocation.isNotEmpty) &&
-            userDateOfBirth != null &&
-            (userGender != null && userGender!.isNotEmpty);
+            userDateOfBirth != null;
 
         if (!userValid) {
           AppLogger().d(
             '❌ [SignUpState] User invalid! '
-            'NameErr: $userNameError, '
-            'Name: $userName, '
+            'FirstErr: $userFirstNameError, '
+            'First: $userFirstName, '
+            'LastErr: $userLastNameError, '
+            'Last: $userLastName, '
             'PhoneErr: $userPhoneError, '
             'Phone: $userPhone, '
             'LocErr: $userLocationError, '
             'Loc: $userLocation, '
-            'DOB: $userDateOfBirth, '
-            'Gender: $userGender',
+            'DOB: $userDateOfBirth',
           );
         }
         return commonValid && userValid;
@@ -168,8 +176,10 @@ class SignUpState {
     String? emailError,
     String? password,
     String? passwordError,
-    String? userName,
-    String? userNameError,
+    String? userFirstName,
+    String? userFirstNameError,
+    String? userLastName,
+    String? userLastNameError,
     String? userPhone,
     String? userPhoneError,
     String? userLocation,
@@ -202,8 +212,10 @@ class SignUpState {
       emailError: emailError,
       password: password ?? this.password,
       passwordError: passwordError,
-      userName: userName ?? this.userName,
-      userNameError: userNameError,
+      userFirstName: userFirstName ?? this.userFirstName,
+      userFirstNameError: userFirstNameError,
+      userLastName: userLastName ?? this.userLastName,
+      userLastNameError: userLastNameError,
       userPhone: userPhone ?? this.userPhone,
       userPhoneError: userPhoneError,
       userLocation: userLocation ?? this.userLocation,

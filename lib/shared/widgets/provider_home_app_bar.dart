@@ -36,12 +36,16 @@ class ProviderHomeAppBar extends StatelessWidget
               backgroundColor: AppColors.white,
               elevation: 0.0,
               scrolledUnderElevation: .6,
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: AssetLoader(
-                  assetPath: data.profilePicture,
-                  width: 40.0,
-                  height: 40.0,
+              leading: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: AssetLoader(
+                    assetPath: data.profilePicture,
+                    width: 40.0,
+                    height: 40.0,
+                    fit: BoxFit.cover,
+                    shape: BoxShape.rectangle,
+                  ),
                 ),
               ),
               automaticallyImplyLeading: false,

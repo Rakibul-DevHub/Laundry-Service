@@ -47,7 +47,7 @@ class NotificationsData {
             (item) => NotificationModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
-      unreadCount: json['unreadCount'] as int,
+      unreadCount: json['unreadCount'] as int? ?? 0,
       pagination: PaginationInfo.fromJson(
         json['pagination'] as Map<String, dynamic>,
       ),

@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/api/api_client.dart';
 import '../../../app/providers/app_providers.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../shared/models/user_model.dart';
 import '../model/rider_profile_response.dart';
 import '../state/provider_profile_state.dart';
@@ -173,9 +174,9 @@ class ProviderProfileNotifier
         },
       );
       final User? user = state.profileValue.value?.copyWith(
-        profilePicture:
-            (response['data'] as Map<String, dynamic>)['profilePicture']
-                as String,
+        profilePicture: AppConstants.resolveMediaUrl(
+          (response['data'] as Map<String, dynamic>)['profilePicture'],
+        ),
       );
       if (user != null) {
         state = state.copyWith(profileValue: AsyncData<User>(user));

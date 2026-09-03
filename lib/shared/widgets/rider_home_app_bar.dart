@@ -43,6 +43,8 @@ class RiderHomeAppBar extends StatelessWidget {
                         assetPath: data.profilePicture,
                         width: 40.0,
                         height: 40.0,
+                        fit: BoxFit.cover,
+                        shape: BoxShape.rectangle,
                       ),
                     ),
                     const SizedBox(width: 16),

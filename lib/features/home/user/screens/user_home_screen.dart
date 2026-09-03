@@ -15,6 +15,7 @@ import '../../../../core/config/colors.dart';
 import '../../../../core/config/icons.dart';
 import '../../../../core/config/sizes.dart';
 import '../../../../shared/widgets/asset_loader.dart';
+import '../../../notification/providers/notifications_provider.dart';
 import '../models/default_location_model.dart';
 import '../notifier/default_location_notifier.dart';
 import '../widgets/service_category.dart';
@@ -260,7 +261,12 @@ class HomeTopSection extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
         InkWell(
-          onTap: () => context.push(RoutePaths.notification),
+          onTap: () async {
+            await context.push(RoutePaths.notification);
+            if (context.mounted) {
+              ref.read(notificationBadgeProvider.notifier).refresh();
+            }
+          },
           borderRadius: BorderRadius.circular(
             AppSizes.borderRadiusMd,
           ),
@@ -273,10 +279,28 @@ class HomeTopSection extends ConsumerWidget {
                 AppSizes.borderRadiusMd,
               ),
             ),
-            child: const AssetLoader(
-              assetPath: AppIcons.notification,
-              width: 24.0,
-              height: 24.0,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                const AssetLoader(
+                  assetPath: AppIcons.notification,
+                  width: 24.0,
+                  height: 24.0,
+                ),
+                if (ref.watch(notificationBadgeProvider) > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

@@ -9,6 +9,7 @@ import '../../../../app/router/route_paths.dart';
 import '../../../../core/config/colors.dart';
 import '../../../../core/config/sizes.dart';
 import '../../../../shared/widgets/custom_refresh_indicator.dart';
+import '../../bottom_nav/provider/bottom_nav_provider.dart';
 import '../models/conversation_model.dart';
 import '../notifiers/conversations_notifier.dart';
 import '../states/conversations_state.dart';
@@ -228,37 +229,49 @@ class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
     final bool isSearching = searchQuery.trim().isNotEmpty;
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(
-            isSearching ? Icons.search_off : Icons.chat_bubble_outline,
-            size: 64,
-            color: AppColors.body.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            isSearching ? 'No matching conversations' : 'No conversations yet',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            isSearching
-                ? 'Try searching with different keywords'
-                : 'Start a conversation now',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.body),
-            textAlign: TextAlign.center,
-          ),
-          if (isSearching) ...<Widget>[
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _clearSearch,
-              child: const Text('Clear Search'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              isSearching ? Icons.search_off : Icons.chat_bubble_outline,
+              size: 64,
+              color: AppColors.body.withValues(alpha: 0.5),
             ),
+            const SizedBox(height: 16),
+            Text(
+              isSearching ? 'No matching conversations' : 'No messages yet',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isSearching
+                  ? 'Try searching with different keywords'
+                  : 'Start a message after you select an Agent. Open an order and tap the chat icon next to that Agent.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.body),
+              textAlign: TextAlign.center,
+            ),
+            if (isSearching) ...<Widget>[
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _clearSearch,
+                child: const Text('Clear Search'),
+              ),
+            ] else ...<Widget>[
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(bottomNavProvider.notifier).setIndex(2);
+                  context.go(RoutePaths.user);
+                },
+                child: const Text('View my orders'),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

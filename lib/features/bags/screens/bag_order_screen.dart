@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/router/route_paths.dart';
 import '../../../app/theme/styles/app_text_styles.dart';
 import '../../../app/toast/toast.dart';
 import '../../../core/config/colors.dart';
@@ -20,6 +21,8 @@ import '../providers/bags_providers.dart';
 import '../widgets/order_delivery_timeline.dart';
 import '../widgets/order_price_summary.dart';
 import '../widgets/shimmer/order_bag_shimmer.dart';
+import '../../home/user/models/default_location_model.dart';
+import '../../home/user/notifier/default_location_notifier.dart';
 
 class BagOrderScreen extends ConsumerWidget {
   const BagOrderScreen({super.key});
@@ -161,6 +164,8 @@ class BagOrderScreen extends ConsumerWidget {
 
           // Price Summary (DYNAMIC - from API)
           OrderPriceSummary(bag: bag),
+          const SizedBox(height: AppSizes.md),
+          const _OrderAddressSection(),
           const SizedBox(height: AppSizes.spaceBetweenSections),
 
           // Action Buttons
@@ -168,6 +173,57 @@ class BagOrderScreen extends ConsumerWidget {
           const SizedBox(height: AppSizes.spaceBetweenSections),
         ],
       ),
+    );
+  }
+}
+
+class _OrderAddressSection extends ConsumerWidget {
+  const _OrderAddressSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<UserLocation?> locationAsync = ref.watch(
+      defaultLocationProvider,
+    );
+
+    return locationAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => _missingAddress(context),
+      data: (UserLocation? location) {
+        if (location == null) {
+          return _missingAddress(context);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Delivery address', style: AppTextStyles.heading5),
+            const SizedBox(height: AppSizes.sm),
+            Text(
+              location.address,
+              style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _missingAddress(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Delivery address required', style: AppTextStyles.heading5),
+        const SizedBox(height: AppSizes.sm),
+        Text(
+          'Add an address so we can deliver your bag. You will not need to enter it again from Profile.',
+          style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
+        ),
+        const SizedBox(height: AppSizes.md),
+        AppElevatedButton(
+          label: 'Add address',
+          onPressed: () => context.push(RoutePaths.userAddressAdd),
+        ),
+      ],
     );
   }
 }
@@ -180,14 +236,13 @@ class OrderActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final UserLocation? location = ref.watch(defaultLocationProvider).value;
+
     return Row(
       children: <Widget>[
         Expanded(
           child: AppOutlineButton(
-            onPressed: () {
-              Toast.showSuccess("Your order has been canceled");
-              context.pop();
-            },
+            onPressed: () => context.pop(),
             label: AppStrings.cancel,
           ),
         ),
@@ -197,10 +252,16 @@ class OrderActions extends ConsumerWidget {
             onPressed: () async {
               if (state.isLoading || state.isOrderLoading) {
                 return;
-              } else {
-                await ref.read(orderBagProvider.notifier).orderExtraBag();
-                // context.pop();
               }
+              if (location == null) {
+                Toast.showWarning(
+                  'Add a delivery address to order a bag.',
+                );
+                await context.push(RoutePaths.userAddressAdd);
+                ref.read(defaultLocationProvider.notifier).refresh();
+                return;
+              }
+              await ref.read(orderBagProvider.notifier).orderExtraBag();
             },
             label: 'Order',
             isLoading: state.isOrderLoading,

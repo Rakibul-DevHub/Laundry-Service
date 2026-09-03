@@ -61,7 +61,9 @@ class ProfileRoutes {
     GoRoute(
       path: RoutePaths.userAddressAdd,
       builder: (BuildContext context, GoRouterState state) {
-        return const UserAddAddressScreen();
+        return UserAddAddressScreen(
+          fromOnboarding: state.extra == true,
+        );
       },
     ),
 

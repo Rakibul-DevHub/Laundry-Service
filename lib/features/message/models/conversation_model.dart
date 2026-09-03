@@ -1,5 +1,6 @@
 // features/messaging/models/conversation_model.dart
 
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable
@@ -43,7 +44,9 @@ class ConversationModel {
           participant['fullName'] as String? ??
           participant['displayName'] as String? ??
           'Unknown',
-      otherUserAvatar: participant['profilePicture'] as String?,
+      otherUserAvatar: AppConstants.resolveMediaUrl(
+        participant['profilePicture'],
+      ),
       lastMessage: lastMessageData?['content'] as String? ?? 'No messages yet',
       // ✅ API uses 'sentAt' for last message time
       lastMessageTime: lastMessageData != null

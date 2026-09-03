@@ -1,6 +1,5 @@
 // features/orders/provider/screens/orders_details_by_status_screen.dart
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drop_n_fresh/app/router/route_paths.dart';
 import 'package:drop_n_fresh/core/config/colors.dart';
 import 'package:drop_n_fresh/core/config/icons.dart';
@@ -402,28 +401,16 @@ class OrdersDetailsByStatusScreen extends ConsumerWidget {
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: user.profilePicture ?? '',
+                child: AssetLoader(
+                  assetPath: user.profilePicture,
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
-                  placeholder: (BuildContext context, String url) => Container(
-                    width: 50,
-                    height: 50,
-                    color: AppColors.paste200,
-                    child: const Icon(Icons.person, color: AppColors.body),
+                  shape: BoxShape.rectangle,
+                  errorWidget: const Icon(
+                    Icons.person,
+                    color: AppColors.body,
                   ),
-                  errorWidget:
-                      (BuildContext context, String url, Object error) =>
-                          Container(
-                            width: 50,
-                            height: 50,
-                            color: AppColors.paste200,
-                            child: const Icon(
-                              Icons.person,
-                              color: AppColors.body,
-                            ),
-                          ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -503,28 +490,16 @@ class OrdersDetailsByStatusScreen extends ConsumerWidget {
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: provider.profilePicture ?? '',
+                child: AssetLoader(
+                  assetPath: provider.profilePicture,
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
-                  placeholder: (BuildContext context, String url) => Container(
-                    width: 50,
-                    height: 50,
-                    color: AppColors.paste200,
-                    child: const Icon(Icons.business, color: AppColors.body),
+                  shape: BoxShape.rectangle,
+                  errorWidget: const Icon(
+                    Icons.business,
+                    color: AppColors.body,
                   ),
-                  errorWidget:
-                      (BuildContext context, String url, Object error) =>
-                          Container(
-                            width: 50,
-                            height: 50,
-                            color: AppColors.paste200,
-                            child: const Icon(
-                              Icons.business,
-                              color: AppColors.body,
-                            ),
-                          ),
                 ),
               ),
               const SizedBox(width: 16),

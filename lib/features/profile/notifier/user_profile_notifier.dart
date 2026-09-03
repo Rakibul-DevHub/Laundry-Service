@@ -8,6 +8,7 @@ import '../../../app/api/api_client.dart';
 import '../../../app/providers/app_providers.dart';
 import '../../../app/router/app_router.dart';
 import '../../../app/toast/toast.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../shared/enums/gender.dart';
 import '../../../shared/models/user_model.dart';
 import '../model/profile_update_response.dart';
@@ -22,6 +23,7 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
   UserProfileState build() {
     _apiClient = ref.read(apiClientProvider);
     _appRouter = ref.read(appRouterProvider);
+    ref.keepAlive();
     Future<dynamic>.microtask(() => _fetchProfile());
     return UserProfileState.initial;
   }
@@ -43,10 +45,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
       setName(response.data.fullName);
       setPhone(response.data.phoneNumber ?? '');
       setLocation(response.data.address.address);
-      final Gender? gender = Gender.fromString(response.data.profile?.gender);
-      if (gender != null) {
-        setGender(gender);
-      }
     } catch (e) {
       AppLogger().e(e.toString(), error: e);
       state = state.copyWith(
@@ -125,7 +123,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
     validateName();
     validatePhone();
     validateLocation();
-    validateGender();
 
     if (!state.isValid) {
       return;
@@ -142,7 +139,6 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
           "fullName": state.name,
           "phoneNumber": state.phone,
           "address": state.location,
-          "gender": state.gender?.name,
         },
       );
       state = state.copyWith(profileValue: AsyncData<User>(response.data));
@@ -172,13 +168,36 @@ class UserProfileNotifier extends AutoDisposeNotifier<UserProfileState> {
           "profilePicture": <File>[state.profileImage!],
         },
       );
+      final dynamic payload = response['data'];
+      final String? pictureUrl = AppConstants.resolveMediaUrl(
+        payload is Map
+            ? payload['profilePicture'] ??
+                  payload['profileImage'] ??
+                  payload['url'] ??
+                  payload
+            : payload,
+      );
       final User? user = state.profileValue.value?.copyWith(
-        profilePicture:
-            (response['data'] as Map<String, dynamic>)['profilePicture']
-                as String,
+        profilePicture: pictureUrl,
       );
       if (user != null) {
-        state = state.copyWith(profileValue: AsyncData<User>(user));
+        state = state.copyWith(
+          profileValue: AsyncData<User>(user),
+          profileImage: null,
+        );
+      }
+      try {
+        final RiderProfileResponse refreshed = await _apiClient.handleRequest(
+          httpMethod: HttpMethod.get,
+          endpoint: ApiEndpoints.userProfile,
+          fromJson: RiderProfileResponse.fromJson,
+        );
+        state = state.copyWith(
+          profileValue: AsyncData<User>(refreshed.data),
+          profileImage: null,
+        );
+      } catch (_) {
+        // Keep the uploaded picture URL already applied above.
       }
     } catch (e) {
       Toast.showError(ExceptionHandler.errorMessage(e));

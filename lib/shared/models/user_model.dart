@@ -1,3 +1,5 @@
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
+
 import 'rider_documents_model.dart';
 
 class User {
@@ -64,11 +66,35 @@ class User {
     this.updatedAt,
   });
 
+  static dynamic _readProfilePicture(Map<String, dynamic> json) {
+    final dynamic topLevel = json['profilePicture'];
+    if (topLevel is String && topLevel.trim().isNotEmpty) {
+      return topLevel;
+    }
+    if (topLevel is Map) {
+      return topLevel;
+    }
+
+    final dynamic nested = json['profile'];
+    if (nested is Map) {
+      final dynamic nestedPicture = nested['profilePicture'];
+      if (nestedPicture is String && nestedPicture.trim().isNotEmpty) {
+        return nestedPicture;
+      }
+      if (nestedPicture is Map) {
+        return nestedPicture['url'] ?? nestedPicture['filePath'];
+      }
+    }
+    return null;
+  }
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'].toString(),
-      fullName: json['fullName'].toString(),
-      profilePicture: json['profilePicture']?.toString(),
+      id: (json['id'] ?? json['_id'] ?? '').toString(),
+      fullName: (json['fullName'] ?? json['name'] ?? '').toString(),
+      profilePicture: AppConstants.resolveMediaUrl(
+        _readProfilePicture(json),
+      ),
       email: json['email'].toString(),
       phoneNumber: json['phoneNumber'] is String
           ? json['phoneNumber'] as String?
@@ -77,10 +103,16 @@ class User {
           ? json['firstName'] as String?
           : null,
       lastName: json['lastName'] is String ? json['lastName'] as String? : null,
-      displayName: json['displayName'].toString(),
-      authRole: json['authRole'].toString(),
-      status: json['status'].toString(),
-      address: Address.fromJson(json['address'] as Map<String, dynamic>),
+      displayName: (json['displayName'] ??
+              json['fullName'] ??
+              json['name'] ??
+              '')
+          .toString(),
+      authRole: (json['authRole'] ?? json['role'] ?? '').toString(),
+      status: (json['status'] ?? '').toString(),
+      address: json['address'] is Map<String, dynamic>
+          ? Address.fromJson(json['address'] as Map<String, dynamic>)
+          : Address(),
       verification: json['verification'] == null
           ? null
           : UserVerification.fromJson(
@@ -91,7 +123,7 @@ class User {
           : RiderVerification.fromJson(
               json['riderVerification'] as Map<String, dynamic>,
             ),
-      profile: json['profile'] != null
+      profile: json['profile'] is Map<String, dynamic>
           ? Profile.fromJson(json['profile'] as Map<String, dynamic>)
           : null,
       businessInfo: json['businessInfo'] != null

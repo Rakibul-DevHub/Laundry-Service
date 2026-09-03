@@ -12,8 +12,8 @@ class SignInState {
   // final String? error;
 
   const SignInState({
-    this.email = '',
-    this.password = '',
+    this.email = 'mrguest@yopmail.com',
+    this.password = '1Qazxsw2@',
     this.isSubmitting = false,
     this.isForgotPopupOpen = false,
     this.isSendOtpSubmitting = false,

@@ -1,5 +1,7 @@
 // ignore_for_file: always_specify_types
 
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
+
 class UserServiceResponse {
   final int code;
   final bool success;
@@ -94,8 +96,9 @@ class UserServiceModel {
       serviceId: json['serviceId'] as String,
       providerId: json['providerId'] as String,
       providerName: json['providerName'] as String,
-      providerProfilePicture: (json['providerProfilePicture'] as String?)
-          ?.trim(),
+      providerProfilePicture: AppConstants.resolveMediaUrl(
+        json['providerProfilePicture'],
+      ),
       businessName: json['businessName'] as String,
       providerRating: _parseNum(json['providerRating']),
       providerTotalRatings: json['providerTotalRatings'] as int,

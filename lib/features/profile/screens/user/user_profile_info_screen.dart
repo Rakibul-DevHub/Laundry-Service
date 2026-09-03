@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:drop_n_fresh/app/router/route_paths.dart';
 import 'package:drop_n_fresh/app/theme/styles/app_text_styles.dart';
 import 'package:drop_n_fresh/core/config/colors.dart';
 import 'package:drop_n_fresh/core/config/sizes.dart';
 import 'package:drop_n_fresh/core/extensions/context_extensions.dart';
-import 'package:drop_n_fresh/shared/enums/gender.dart';
+import 'package:drop_n_fresh/core/utils/image_picker_utils.dart';
 import 'package:drop_n_fresh/shared/models/user_model.dart';
 import 'package:drop_n_fresh/shared/widgets/asset_loader.dart';
 import 'package:drop_n_fresh/shared/widgets/dashed_divider.dart';
@@ -27,6 +29,11 @@ class UserProfileInfoScreen extends ConsumerWidget {
     final AsyncValue<User> user = ref.watch(
       userProfileProvider.select(
         (UserProfileState value) => value.profileValue,
+      ),
+    );
+    final File? localImage = ref.watch(
+      userProfileProvider.select(
+        (UserProfileState value) => value.profileImage,
       ),
     );
 
@@ -70,16 +77,45 @@ class UserProfileInfoScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  // Profile Image with Camera Icon
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: AssetLoader(
-                      assetPath: data.profilePicture,
-                      width: 100,
-                      height: 100,
-                      shape: BoxShape.rectangle,
+                  GestureDetector(
+                    onTap: () async {
+                      final File? file =
+                          await ImagePickerUtils.pickImageFile();
+                      if (file != null) {
+                        ref
+                            .read(userProfileProvider.notifier)
+                            .setProfileImage(file);
+                        await ref
+                            .read(userProfileProvider.notifier)
+                            .saveProfilePicture();
+                      }
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: <Widget>[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: AssetLoader(
+                            assetPath: localImage ?? data.profilePicture,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            shape: BoxShape.rectangle,
+                          ),
+                        ),
+                        const Positioned(
+                          bottom: -8,
+                          right: 0,
+                          child: AssetLoader(
+                            assetPath: AppIcons.camera,
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 20),
                   const SizedBox(height: AppSizes.spaceBetweenSections),
 
                   // Name
@@ -146,26 +182,11 @@ class UserProfileInfoScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.sm),
 
-                  // // Age
-                  // const _FieldLabel(label: 'Age'),
-                  // Text(
-                  //   profile.age.toString(),
-                  //   style: AppTextStyles.paragraph0,
-                  // ),
-                  // const SizedBox(height: AppSizes.md),
-                  // const DashedDivider(
-                  //   dashGap: 1,
-                  //   dashLength: 5.0,
-                  //   color: AppColors.body,
-                  // ),
-                  // const SizedBox(height: AppSizes.md),
-                  // Gender
-                  const _FieldLabel(label: 'Gender'),
-                  Text(
-                    Gender.fromString(data.profile?.gender)?.name ?? "Unknown",
-                    style: AppTextStyles.paragraph0,
+                  const DashedDivider(
+                    dashGap: 1,
+                    dashLength: 5.0,
+                    color: AppColors.body,
                   ),
-                  const SizedBox(height: 32),
                 ],
               ),
             ),

@@ -7,7 +7,6 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../shared/enums/role.dart';
 import '../../providers/auth_providers.dart';
 import '../../state/sign_up_state.dart';
-import 'sign_up_dropdown.dart';
 import 'sign_up_text_field.dart';
 
 class UserForm extends ConsumerWidget {
@@ -22,13 +21,24 @@ class UserForm extends ConsumerWidget {
       children: <Widget>[
         SignUpTextField(
           role: role,
-          labelText: AppStrings.signUPName,
-          getValue: (SignUpState s) => s.userName,
-          getError: (SignUpState s) => s.userNameError,
+          labelText: AppStrings.signUPFirstName,
+          getValue: (SignUpState s) => s.userFirstName,
+          getError: (SignUpState s) => s.userFirstNameError,
           onChanged: (WidgetRef ref, String v) =>
-              ref.read(signUpProvider(role).notifier).setUserName(v),
+              ref.read(signUpProvider(role).notifier).setUserFirstName(v),
           onUnfocus: (WidgetRef ref) =>
-              ref.read(signUpProvider(role).notifier).userNameValidate(),
+              ref.read(signUpProvider(role).notifier).userFirstNameValidate(),
+        ),
+        const SizedBox(height: AppSizes.spaceBetweenInputs),
+        SignUpTextField(
+          role: role,
+          labelText: AppStrings.signUPLastName,
+          getValue: (SignUpState s) => s.userLastName,
+          getError: (SignUpState s) => s.userLastNameError,
+          onChanged: (WidgetRef ref, String v) =>
+              ref.read(signUpProvider(role).notifier).setUserLastName(v),
+          onUnfocus: (WidgetRef ref) =>
+              ref.read(signUpProvider(role).notifier).userLastNameValidate(),
         ),
         const SizedBox(height: AppSizes.spaceBetweenInputs),
         SignUpTextField(
@@ -68,19 +78,6 @@ class UserForm extends ConsumerWidget {
         const SizedBox(height: AppSizes.spaceBetweenInputs),
         // Date of Birth (keep as is since it uses ValueNotifier)
         _UserDateOfBirthField(role: role),
-        const SizedBox(height: AppSizes.spaceBetweenInputs),
-        SignUpDropdownField(
-          role: role,
-          labelText: AppStrings.signUPGender,
-          getValue: (SignUpState s) => s.userGender,
-          onChanged: (WidgetRef ref, String v) =>
-              ref.read(signUpProvider(role).notifier).setUserGender(v),
-          items: const <String>[
-            AppStrings.male,
-            AppStrings.female,
-            AppStrings.other,
-          ],
-        ),
         const SizedBox(height: AppSizes.spaceBetweenInputs),
         SignUpTextField(
           role: role,
@@ -135,13 +132,15 @@ class _UserDateOfBirthFieldState extends ConsumerState<_UserDateOfBirthField> {
       },
       child: InputDecorator(
         decoration: const InputDecoration(
-          labelText: AppStrings.dateOfBirth,
-          border: OutlineInputBorder(),
+          // labelText: AppStrings.dateOfBirth,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12))
+          ),
           suffixIcon: Icon(Icons.arrow_drop_down),
         ),
         child: Text(
           _dob == null
-              ? AppStrings.selectDate
+              ? AppStrings.dateOfBirth
               : '${_dob!.day}/${_dob!.month}/${_dob!.year}',
         ),
       ),

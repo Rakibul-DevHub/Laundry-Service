@@ -18,7 +18,12 @@ import '../../notifier/user_location_notifier.dart';
 import '../../widgets/location_search_result.dart';
 
 class UserAddAddressScreen extends ConsumerStatefulWidget {
-  const UserAddAddressScreen({super.key});
+  final bool fromOnboarding;
+
+  const UserAddAddressScreen({
+    super.key,
+    this.fromOnboarding = false,
+  });
 
   @override
   ConsumerState<UserAddAddressScreen> createState() =>
@@ -29,7 +34,6 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   SearchedLocation? _selectedLocation;
-  final bool _isDefault = false;
   bool _showSearchResults = false;
 
   @override
@@ -68,7 +72,8 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
       longitude: _selectedLocation!.longitude,
       address: _selectedLocation!.address,
       name: _nameController.text.trim(),
-      isDefault: _isDefault,
+      isDefault: widget.fromOnboarding ||
+          ref.read(userLocationProvider).savedLocations.isEmpty,
     );
 
     final bool success = await ref
@@ -76,7 +81,11 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
         .saveLocation(request);
 
     if (success && mounted) {
-      context.pop(true);
+      if (widget.fromOnboarding) {
+        context.go(RoutePaths.user);
+      } else {
+        context.pop(true);
+      }
     }
   }
 
@@ -84,11 +93,15 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
   Widget build(BuildContext context) {
     final UserLocationState state = ref.watch(userLocationProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: !widget.fromOnboarding,
+      child: Scaffold(
       backgroundColor: AppColors.white,
-      appBar: const CustomAppBar(
-        title: 'Add Location',
-        showBackBtn: true,
+      appBar: CustomAppBar(
+        title: widget.fromOnboarding
+            ? 'Add Delivery Address'
+            : 'Add Location',
+        showBackBtn: !widget.fromOnboarding,
         titleAlignment: TitleAlignment.left,
       ),
       body: SingleChildScrollView(
@@ -96,6 +109,13 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            if (widget.fromOnboarding) ...<Widget>[
+              Text(
+                'Add your delivery address so we can send your bag and pick up laundry from the right place.',
+                style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
+              ),
+              const SizedBox(height: 24),
+            ],
             // Search Field
             Text(
               'Search Location *',
@@ -286,6 +306,7 @@ class _UserAddAddressScreenState extends ConsumerState<UserAddAddressScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

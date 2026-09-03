@@ -130,13 +130,15 @@ class _RiderDateOfBirthFieldState
       },
       child: InputDecorator(
         decoration: const InputDecoration(
-          labelText: AppStrings.dateOfBirth,
-          border: OutlineInputBorder(),
+          // labelText: AppStrings.dateOfBirth,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12))
+          ),
           suffixIcon: Icon(Icons.arrow_drop_down),
         ),
         child: Text(
           _dob == null
-              ? AppStrings.selectDate
+              ? AppStrings.dateOfBirth
               : '${_dob!.day}/${_dob!.month}/${_dob!.year}',
         ),
       ),

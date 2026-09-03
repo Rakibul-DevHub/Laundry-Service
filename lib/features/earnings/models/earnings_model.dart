@@ -2,6 +2,7 @@
 
 // ignore_for_file: always_specify_types
 
+import 'package:drop_n_fresh/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 @immutable
@@ -90,7 +91,8 @@ class EarningsModel {
       // Counterparty info
       counterpartyName: json['counterpartyName'] as String? ?? 'N/A',
       counterpartyPhone: json['counterpartyPhone'] as String? ?? 'N/A',
-      counterpartyPicture: json['counterpartyPicture'] as String? ?? '',
+      counterpartyPicture:
+          AppConstants.resolveMediaUrl(json['counterpartyPicture']) ?? '',
 
       // Locations
       pickupLocation: json['pickupLocation'] as String? ?? 'N/A',

@@ -73,8 +73,11 @@ class OrderBagNotifier extends AutoDisposeNotifier<OrderBagState> {
             );
         ref.read(myBagProvider.notifier).refresh();
       } else {
-        Toast.showSuccess(response.message);
-        ref.read(appRouterProvider).pop();
+        Toast.showError(
+          response.message.isNotEmpty
+              ? response.message
+              : 'Unable to start bag checkout. Please add a delivery address and try again.',
+        );
       }
     } catch (e, stack) {
       Toast.showError(ExceptionHandler.errorMessage(e));
