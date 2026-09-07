@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/config/colors.dart';
 import '../../../../core/config/strings.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../providers/auth_providers.dart';
 import '../../state/sign_in_state.dart';
 
-class SignInPasswordField extends ConsumerWidget {
+class SignInPasswordField extends ConsumerStatefulWidget {
   const SignInPasswordField({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SignInPasswordField> createState() =>
+      _SignInPasswordFieldState();
+}
+
+class _SignInPasswordFieldState extends ConsumerState<SignInPasswordField> {
+  bool _obscurePassword = true;
+
+  @override
+  Widget build(BuildContext context) {
     AppLogger().d("SIGN IN _SignInPasswordField BUILD");
 
-    // Only rebuild when password & passwordError changes
     final String? passwordError = ref.watch(
       signInProvider.select((SignInState state) => state.passwordError),
     );
@@ -25,7 +33,7 @@ class SignInPasswordField extends ConsumerWidget {
 
     return AppTextField(
       labelText: AppStrings.signInPassword,
-      obscureText: true,
+      obscureText: _obscurePassword,
       errorText: passwordError,
       initialValue: password,
       onEditingComplete: () {
@@ -36,6 +44,17 @@ class SignInPasswordField extends ConsumerWidget {
       },
       onChanged: (String value) =>
           ref.read(signInProvider.notifier).setPassword(value),
+      suffixIcon: IconButton(
+        icon: Icon(
+          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+          color: AppColors.body,
+        ),
+        onPressed: () {
+          setState(() {
+            _obscurePassword = !_obscurePassword;
+          });
+        },
+      ),
     );
   }
 }
