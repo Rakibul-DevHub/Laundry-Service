@@ -1,84 +1,139 @@
 # Laundry Service
 
-A comprehensive on-demand laundry & dry cleaning service platform built with Flutter. Connects users, service providers, and delivery riders in a seamless ecosystem.
+**Laundry Service** is a Flutter mobile app for on-demand laundry, dry cleaning, and related pickup/delivery services. One codebase serves three roles: **Guests** (customers), **Couriers** (riders), and **Agents** (service providers).
+
+Package name: `drop_n_fresh`  
+Android application ID: `com.dropnfresh.app`  
+Version: `1.0.0+1`
 
 ---
 
+## Overview
+
+The app connects customers who need laundry and garment care with local agents and couriers who pick up, process, and return items.
+
+| Role in the UI | Internal role | Who it is for |
+| --- | --- | --- |
+| Guest | `user` | Customers who order bags, book services, and track orders |
+| Courier | `rider` | Drivers who accept pickup and delivery jobs |
+| Agent | `provider` | Businesses that offer wash, fold, press, and dry-cleaning services |
+
+Users sign in once. If a valid access token is still active, splash restores the session and opens the matching home for that role.
+
+---
 
 ## Features
 
-### User App
-- Place & track laundry orders
-- Messaging with providers
-- View order history
-- Secure Stripe payment integration
-- Location-based service selection
+### Guest
 
-### Provider Dashboard
-- Manage orders by status
-- Accept/Reject orders with one tap
-- Detailed pricing & customer info
+- Email sign-up and sign-in with OTP verification
+- Onboarding and saved delivery locations
+- Order reusable bags, with address selection that does **not** change the account default location
+- Browse nearby agents and book services (schedule, products, delivery method, checkout)
+- Track orders and view order history
+- In-app messages with agents
+- Push notifications
+- Profile, photo upload, password change, and account deletion
+- Stripe-hosted checkout for bag and service payments
 
-### Rider App
-- Available jobs with location & payout
-- Accept/Remove jobs instantly
-- Earnings tracking & history
-- Stripe Connect for payouts
+### Courier
+
+- Identity verification (ID, driving license, selfie, vehicle)
+- Online / offline status for job availability
+- Incoming job requests with location and payout
+- Job tracking, checkpoints, and completion flow
+- Earnings, transactions, and withdrawals
+- Stripe Connect onboarding for payouts
+
+### Agent
+
+- Business profile, documents, and business hours
+- Create and manage services and product categories
+- Incoming bookings: accept, process, and complete
+- Order overview by status
+- Earnings, transactions, and withdrawals
+- Stripe Connect onboarding for payouts
+
+### Shared
+
+- Role-based routing and bottom navigation
+- Secure token storage and session restore on splash
+- Access-token refresh when the token is expired
+- Support, Terms, Privacy, and About content from the API
+- Google Maps for location picking
+- Firebase Cloud Messaging for push notifications
 
 ---
 
+## Tech stack
 
-## Tech Stack
-
-```yaml
-Framework: Flutter 3.x
-State Management: Riverpod
-Navigation: GoRouter
-Networking: Dio + Interceptors
-Storage: flutter_secure_storage
-UI: Custom widgets + Shimmer loading
-API: REST + Socket.IO ready
-Payments: Stripe Connect
-```
+| Area | Choice |
+| --- | --- |
+| Framework | Flutter (Dart SDK `^3.9.2`) |
+| State management | Riverpod |
+| Navigation | GoRouter with public-route and role guards |
+| Networking | Dio, interceptors, typed REST client |
+| Local storage | `flutter_secure_storage` |
+| Auth | JWT access + refresh tokens |
+| Maps | Google Maps, Geolocator, Geocoding |
+| Payments | Stripe Checkout / Stripe Connect |
+| Push | Firebase Core, Firebase Messaging, local notifications |
+| Media | Cached network images, SVG, video, image/file pickers |
+| Other | QR, barcode scanner, WebView, HTML content, shimmer loaders |
 
 ---
 
-## Project Structure
+## Architecture
 
-```yaml
-  lib/
-  ├── app/                     # App configuration, router, providers
-  │   ├── api/                 # API client, interceptors
-  │   ├── router/              # GoRouter configuration
-  │   └── providers/           # Global providers
-  ├── core/                    # Utils, extensions, config, storage
-  │   ├── config/              # Colors, sizes, icons
-  │   ├── extensions/          # Context extensions
-  │   ├── storage/             # Secure storage service
-  │   └── utils/               # Logger, exceptions
-  ├── features/                # Feature modules
-  │   ├── auth/                # Authentication
-  │   ├── bookings/            # Order booking flow
-  │   ├── orders/              # User order management
-  │   ├── messaging/           # Chat system
-  │   ├── earnings/            # Revenue tracking
-  │   └── riders/              # Rider job management
-  ├── shared/                  # Reusable widgets & components
-  │   ├── widgets/             # Common UI components
-  │   └── shimmer/             # Loading skeletons
-  └── main.dart                # Entry point
-  └── app.dart
+The project is feature-first. Each feature typically includes screens, widgets, notifiers, state, models, and providers.
+
+```text
+lib/
+├── main.dart                         # App entry, Firebase, ProviderScope
+├── screens.dart                      # Screen exports
+│
+├── app/
+│   ├── app.dart                      # Root MaterialApp
+│   ├── api/                          # Dio client, endpoints, interceptors
+│   ├── router/                       # GoRouter, route paths, role guards
+│   ├── providers/                    # API client and storage providers
+│   ├── theme/                        # Text styles and theming
+│   └── toast/                        # In-app toasts
+│
+├── core/
+│   ├── config/                       # Colors, sizes, strings, legal copy
+│   ├── constants/                    # API base URL, media URL helpers
+│   ├── storage/                      # Secure storage
+│   ├── services/                     # Notifications
+│   ├── utils/                        # Logger, validation, JWT helpers
+│   └── extensions/
+│
+├── features/
+│   ├── auth/
+│   ├── bags/
+│   ├── home/                         # Guest, Courier, Agent homes
+│   ├── services/
+│   ├── orders/
+│   ├── jobs/
+│   ├── earnings/
+│   ├── message/
+│   ├── notification/
+│   ├── profile/
+│   ├── location/
+│   └── bottom_nav/
+│
+└── shared/
+    ├── widgets/
+    ├── enums/
+    └── models/
+
 ```
+
+---
 
 ## Getting Started
 
 ```bash
-# Clone the repository
-git clone https://github.com/sparktechagency/drop-n-fresh-app
-
-# Install dependencies
+git clone <repository-url>
 flutter pub get
-
-# Run the app
 flutter run
-```
