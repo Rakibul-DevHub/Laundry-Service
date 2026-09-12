@@ -52,7 +52,15 @@ class OrderBagNotifier extends AutoDisposeNotifier<OrderBagState> {
     }
   }
 
-  Future<void> orderExtraBag() async {
+  void selectLocation(String locationId) {
+    if (state.selectedLocationId == locationId) {
+      return;
+    }
+    state = state.copyWith(selectedLocationId: locationId);
+  }
+
+  Future<void> orderExtraBag({String? locationId}) async {
+    final String? deliveryLocationId = locationId ?? state.selectedLocationId;
     state = state.copyWith(isLoading: false, isOrderLoading: true, error: null);
 
     try {
@@ -61,6 +69,9 @@ class OrderBagNotifier extends AutoDisposeNotifier<OrderBagState> {
             httpMethod: HttpMethod.post,
             endpoint: ApiEndpoints.bagCheckout,
             fromJson: BagCheckoutResponseModel.fromJson,
+            data: deliveryLocationId == null || deliveryLocationId.isEmpty
+                ? null
+                : <String, String>{'locationId': deliveryLocationId},
           );
 
       if (response.data.checkoutUrl != null &&

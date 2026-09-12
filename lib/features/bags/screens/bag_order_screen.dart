@@ -16,19 +16,23 @@ import '../../../shared/widgets/app_outline_button.dart';
 import '../../../shared/widgets/asset_loader.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
 import '../../../shared/widgets/custom_refresh_indicator.dart';
+import '../../home/user/notifier/default_location_notifier.dart';
+import '../../profile/model/user_location_model.dart';
+import '../../profile/notifier/user_location_notifier.dart';
+import '../../profile/state/user_location_state.dart';
 import '../models/order_bag_model.dart';
 import '../providers/bags_providers.dart';
+import '../widgets/order_bag_address_section.dart';
 import '../widgets/order_delivery_timeline.dart';
 import '../widgets/order_price_summary.dart';
 import '../widgets/shimmer/order_bag_shimmer.dart';
-import '../../home/user/models/default_location_model.dart';
-import '../../home/user/notifier/default_location_notifier.dart';
 
 class BagOrderScreen extends ConsumerWidget {
   const BagOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(userLocationProvider);
     final OrderBagState state = ref.watch(orderBagProvider);
 
     return Scaffold(
@@ -38,7 +42,13 @@ class BagOrderScreen extends ConsumerWidget {
       ),
       backgroundColor: AppColors.white,
       body: CustomRefreshIndicator(
-        onRefresh: () => ref.read(orderBagProvider.notifier).refresh(),
+        onRefresh: () async {
+          await Future.wait(<Future<void>>[
+            ref.read(orderBagProvider.notifier).refresh(),
+            ref.read(userLocationProvider.notifier).refresh(),
+            ref.read(defaultLocationProvider.notifier).refresh(),
+          ]);
+        },
         child: state.isLoading
             ? const OrderBagShimmer()
             : state.error != null
@@ -165,7 +175,7 @@ class BagOrderScreen extends ConsumerWidget {
           // Price Summary (DYNAMIC - from API)
           OrderPriceSummary(bag: bag),
           const SizedBox(height: AppSizes.md),
-          const _OrderAddressSection(),
+          const OrderBagAddressSection(),
           const SizedBox(height: AppSizes.spaceBetweenSections),
 
           // Action Buttons
@@ -173,57 +183,6 @@ class BagOrderScreen extends ConsumerWidget {
           const SizedBox(height: AppSizes.spaceBetweenSections),
         ],
       ),
-    );
-  }
-}
-
-class _OrderAddressSection extends ConsumerWidget {
-  const _OrderAddressSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<UserLocation?> locationAsync = ref.watch(
-      defaultLocationProvider,
-    );
-
-    return locationAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => _missingAddress(context),
-      data: (UserLocation? location) {
-        if (location == null) {
-          return _missingAddress(context);
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Delivery address', style: AppTextStyles.heading5),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              location.address,
-              style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _missingAddress(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text('Delivery address required', style: AppTextStyles.heading5),
-        const SizedBox(height: AppSizes.sm),
-        Text(
-          'Add an address so we can deliver your bag. You will not need to enter it again from Profile.',
-          style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
-        ),
-        const SizedBox(height: AppSizes.md),
-        AppElevatedButton(
-          label: 'Add address',
-          onPressed: () => context.push(RoutePaths.userAddressAdd),
-        ),
-      ],
     );
   }
 }
@@ -236,7 +195,19 @@ class OrderActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final UserLocation? location = ref.watch(defaultLocationProvider).value;
+    final UserLocationState locationState = ref.watch(userLocationProvider);
+    final String? selectedLocationId = state.selectedLocationId;
+    final String? deliveryLocationId =
+        selectedLocationId != null &&
+            locationState.savedLocations.any(
+              (UserLocation location) => location.id == selectedLocationId,
+            )
+        ? selectedLocationId
+        : locationState.savedLocations
+                  .where((UserLocation location) => location.isDefault)
+                  .firstOrNull
+                  ?.id ??
+              locationState.savedLocations.firstOrNull?.id;
 
     return Row(
       children: <Widget>[
@@ -253,15 +224,20 @@ class OrderActions extends ConsumerWidget {
               if (state.isLoading || state.isOrderLoading) {
                 return;
               }
-              if (location == null) {
+              if (deliveryLocationId == null) {
                 Toast.showWarning(
                   'Add a delivery address to order a bag.',
                 );
                 await context.push(RoutePaths.userAddressAdd);
-                ref.read(defaultLocationProvider.notifier).refresh();
+                if (!context.mounted) {
+                  return;
+                }
+                await ref.read(userLocationProvider.notifier).refresh();
                 return;
               }
-              await ref.read(orderBagProvider.notifier).orderExtraBag();
+              await ref
+                  .read(orderBagProvider.notifier)
+                  .orderExtraBag(locationId: deliveryLocationId);
             },
             label: 'Order',
             isLoading: state.isOrderLoading,

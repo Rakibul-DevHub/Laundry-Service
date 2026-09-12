@@ -24,6 +24,9 @@ class SplashScreen extends ConsumerWidget {
       AsyncValue<AuthFlowDecision> next,
     ) {
       next.whenData((AuthFlowDecision decision) {
+        if (!context.mounted) {
+          return;
+        }
         final GoRouter router = ref.read(appRouterProvider);
 
         switch (decision) {
@@ -33,13 +36,13 @@ class SplashScreen extends ConsumerWidget {
               Role.rider => RoutePaths.rider,
               Role.provider => RoutePaths.provider,
             };
-            router.pushReplacement(path);
+            router.go(path);
           case GoToOnboardingDecision():
-            router.pushReplacement(RoutePaths.onboarding);
+            router.go(RoutePaths.onboarding);
           case GoToLoginDecision():
-            router.pushReplacement(RoutePaths.signIn);
+            router.go(RoutePaths.signIn);
           case GoToRiderDocumentsDecision():
-            router.pushReplacement(
+            router.go(
               RoutePaths.verifyRiderHome,
               extra: RiderVerifyIdentityFromType.verify,
             );

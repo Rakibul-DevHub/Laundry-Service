@@ -12,6 +12,7 @@ class AppConstants {
   static const String baseUrl =
       "https://zrz9f9td-8010.inc1.devtunnels.ms/api/v1";
 
+
   /// S3 bucket used for profile and other uploaded media.
   static const String imageBaseUrl =
       'https://dropnfresh-prod.s3.us-east-1.amazonaws.com/';
