@@ -8,10 +8,11 @@ import '../../../core/config/colors.dart';
 import '../../../core/config/sizes.dart';
 import '../../../shared/widgets/app_elevated_button.dart';
 import '../../../shared/widgets/app_outline_button.dart';
-import '../../home/user/notifier/default_location_notifier.dart';
 import '../../profile/model/user_location_model.dart';
 import '../../profile/notifier/user_location_notifier.dart';
 import '../../profile/state/user_location_state.dart';
+import '../providers/bags_providers.dart';
+import '../state/order_bag_state.dart';
 
 class OrderBagAddressSection extends ConsumerStatefulWidget {
   const OrderBagAddressSection({super.key});
@@ -24,32 +25,29 @@ class OrderBagAddressSection extends ConsumerStatefulWidget {
 class _OrderBagAddressSectionState
     extends ConsumerState<OrderBagAddressSection> {
   final List<String> _orderIds = <String>[];
-  String? _selectedId;
 
   Future<void> _openAddLocation() async {
+    final Set<String> existingIds = _orderIds.toSet();
     await context.push(RoutePaths.userAddressAdd);
     if (!mounted) {
       return;
     }
     await ref.read(userLocationProvider.notifier).refresh();
-    await ref.read(defaultLocationProvider.notifier).refresh();
-  }
-
-  Future<void> _selectLocation(UserLocation location) async {
-    if (_selectedId == location.id) {
-      return;
-    }
-    final String? previousSelectedId = _selectedId;
-    setState(() => _selectedId = location.id);
-    final bool success = await ref
-        .read(userLocationProvider.notifier)
-        .setDefaultLocation(location.id);
     if (!mounted) {
       return;
     }
-    if (!success) {
-      setState(() => _selectedId = previousSelectedId);
+    final UserLocation? addedLocation = ref
+        .read(userLocationProvider)
+        .savedLocations
+        .where((UserLocation location) => !existingIds.contains(location.id))
+        .lastOrNull;
+    if (addedLocation != null) {
+      ref.read(orderBagProvider.notifier).selectLocation(addedLocation.id);
     }
+  }
+
+  void _selectLocation(UserLocation location) {
+    ref.read(orderBagProvider.notifier).selectLocation(location.id);
   }
 
   List<UserLocation> _orderedLocations(List<UserLocation> locations) {
@@ -70,16 +68,38 @@ class _OrderBagAddressSectionState
     return ordered;
   }
 
+  String? _resolveSelectedId(
+    List<UserLocation> locations,
+    String? selectedLocationId,
+  ) {
+    if (selectedLocationId != null &&
+        locations.any(
+          (UserLocation location) => location.id == selectedLocationId,
+        )) {
+      return selectedLocationId;
+    }
+    return locations
+            .where((UserLocation location) => location.isDefault)
+            .firstOrNull
+            ?.id ??
+        locations.firstOrNull?.id;
+  }
+
   @override
   Widget build(BuildContext context) {
     final UserLocationState state = ref.watch(userLocationProvider);
+    final String? selectedLocationId = ref.watch(
+      orderBagProvider.select(
+        (OrderBagState orderState) => orderState.selectedLocationId,
+      ),
+    );
     final List<UserLocation> locations = _orderedLocations(
       state.savedLocations,
     );
-    _selectedId ??= locations
-        .where((UserLocation location) => location.isDefault)
-        .firstOrNull
-        ?.id;
+    final String? selectedId = _resolveSelectedId(
+      locations,
+      selectedLocationId,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,8 +150,7 @@ class _OrderBagAddressSectionState
               return _AddressOption(
                 key: ValueKey<String>(location.id),
                 location: location,
-                selectedId: _selectedId,
-                isUpdating: state.isUpdating,
+                selectedId: selectedId,
                 onSelect: () => _selectLocation(location),
               );
             }).toList(),
@@ -146,13 +165,11 @@ class _AddressOption extends StatelessWidget {
     super.key,
     required this.location,
     required this.selectedId,
-    required this.isUpdating,
     required this.onSelect,
   });
 
   final UserLocation location;
   final String? selectedId;
-  final bool isUpdating;
   final VoidCallback onSelect;
 
   @override
@@ -165,7 +182,7 @@ class _AddressOption extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: isUpdating ? null : onSelect,
+          onTap: onSelect,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -187,7 +204,7 @@ class _AddressOption extends StatelessWidget {
                   // ignore: deprecated_member_use
                   groupValue: selectedId,
                   // ignore: deprecated_member_use
-                  onChanged: isUpdating ? null : (_) => onSelect(),
+                  onChanged: (_) => onSelect(),
                   activeColor: AppColors.primary,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -206,25 +223,13 @@ class _AddressOption extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (location.isDefault) ...<Widget>[
+                            const SizedBox(width: AppSizes.sm),
+                            const _AddressBadge(label: 'Default'),
+                          ],
                           if (isSelected) ...<Widget>[
                             const SizedBox(width: AppSizes.sm),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.sm,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                'Selected',
-                                style: AppTextStyles.paragraph3.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                            const _AddressBadge(label: 'Selected'),
                           ],
                         ],
                       ),
@@ -243,6 +248,33 @@ class _AddressOption extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddressBadge extends StatelessWidget {
+  const _AddressBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.paragraph3.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

@@ -196,9 +196,18 @@ class OrderActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final UserLocationState locationState = ref.watch(userLocationProvider);
-    final bool hasDeliveryAddress = locationState.savedLocations.any(
-      (UserLocation location) => location.isDefault,
-    );
+    final String? selectedLocationId = state.selectedLocationId;
+    final String? deliveryLocationId =
+        selectedLocationId != null &&
+            locationState.savedLocations.any(
+              (UserLocation location) => location.id == selectedLocationId,
+            )
+        ? selectedLocationId
+        : locationState.savedLocations
+                  .where((UserLocation location) => location.isDefault)
+                  .firstOrNull
+                  ?.id ??
+              locationState.savedLocations.firstOrNull?.id;
 
     return Row(
       children: <Widget>[
@@ -212,30 +221,23 @@ class OrderActions extends ConsumerWidget {
         Expanded(
           child: AppElevatedButton(
             onPressed: () async {
-              if (state.isLoading ||
-                  state.isOrderLoading ||
-                  locationState.isUpdating) {
+              if (state.isLoading || state.isOrderLoading) {
                 return;
               }
-              if (!hasDeliveryAddress) {
-                if (locationState.savedLocations.isEmpty) {
-                  Toast.showWarning(
-                    'Add a delivery address to order a bag.',
-                  );
-                  await context.push(RoutePaths.userAddressAdd);
-                } else {
-                  Toast.showWarning(
-                    'Select a delivery address to order a bag.',
-                  );
-                }
+              if (deliveryLocationId == null) {
+                Toast.showWarning(
+                  'Add a delivery address to order a bag.',
+                );
+                await context.push(RoutePaths.userAddressAdd);
                 if (!context.mounted) {
                   return;
                 }
                 await ref.read(userLocationProvider.notifier).refresh();
-                await ref.read(defaultLocationProvider.notifier).refresh();
                 return;
               }
-              await ref.read(orderBagProvider.notifier).orderExtraBag();
+              await ref
+                  .read(orderBagProvider.notifier)
+                  .orderExtraBag(locationId: deliveryLocationId);
             },
             label: 'Order',
             isLoading: state.isOrderLoading,
