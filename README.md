@@ -1,4 +1,4 @@
-# Drop n Fresh
+# Laundry Service
 
 A comprehensive on-demand laundry & dry cleaning service platform built with Flutter. Connects users, service providers, and delivery riders in a seamless ecosystem.
 
