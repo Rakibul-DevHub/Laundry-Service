@@ -13,31 +13,70 @@ import '../../profile/model/user_location_model.dart';
 import '../../profile/notifier/user_location_notifier.dart';
 import '../../profile/state/user_location_state.dart';
 
-class OrderBagAddressSection extends ConsumerWidget {
+class OrderBagAddressSection extends ConsumerStatefulWidget {
   const OrderBagAddressSection({super.key});
 
-  Future<void> _openAddLocation(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<OrderBagAddressSection> createState() =>
+      _OrderBagAddressSectionState();
+}
+
+class _OrderBagAddressSectionState
+    extends ConsumerState<OrderBagAddressSection> {
+  final List<String> _orderIds = <String>[];
+  String? _selectedId;
+
+  Future<void> _openAddLocation() async {
     await context.push(RoutePaths.userAddressAdd);
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
     await ref.read(userLocationProvider.notifier).refresh();
     await ref.read(defaultLocationProvider.notifier).refresh();
   }
 
-  Future<void> _selectLocation(WidgetRef ref, UserLocation location) async {
-    if (location.isDefault) {
+  Future<void> _selectLocation(UserLocation location) async {
+    if (_selectedId == location.id) {
       return;
     }
-    await ref.read(userLocationProvider.notifier).setDefaultLocation(
-      location.id,
-    );
+    final String? previousSelectedId = _selectedId;
+    setState(() => _selectedId = location.id);
+    final bool success = await ref
+        .read(userLocationProvider.notifier)
+        .setDefaultLocation(location.id);
+    if (!mounted) {
+      return;
+    }
+    if (!success) {
+      setState(() => _selectedId = previousSelectedId);
+    }
+  }
+
+  List<UserLocation> _orderedLocations(List<UserLocation> locations) {
+    final Map<String, UserLocation> byId = <String, UserLocation>{
+      for (final UserLocation location in locations) location.id: location,
+    };
+    final List<UserLocation> ordered = <UserLocation>[];
+    for (final String id in _orderIds) {
+      final UserLocation? location = byId.remove(id);
+      if (location != null) {
+        ordered.add(location);
+      }
+    }
+    ordered.addAll(byId.values);
+    _orderIds
+      ..clear()
+      ..addAll(ordered.map((UserLocation location) => location.id));
+    return ordered;
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final UserLocationState state = ref.watch(userLocationProvider);
-    final String? selectedId = state.savedLocations
+    final List<UserLocation> locations = _orderedLocations(
+      state.savedLocations,
+    );
+    _selectedId ??= locations
         .where((UserLocation location) => location.isDefault)
         .firstOrNull
         ?.id;
@@ -51,7 +90,7 @@ class OrderBagAddressSection extends ConsumerWidget {
               child: Text('Delivery address', style: AppTextStyles.heading5),
             ),
             TextButton.icon(
-              onPressed: () => _openAddLocation(context, ref),
+              onPressed: _openAddLocation,
               icon: const Icon(
                 Icons.add_location_alt_outlined,
                 color: AppColors.primary,
@@ -72,29 +111,28 @@ class OrderBagAddressSection extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSizes.sm),
-        if (state.isLoading && state.savedLocations.isEmpty)
+        if (state.isLoading && locations.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSizes.md),
             child: Center(child: CircularProgressIndicator()),
           )
-        else if (state.error != null && state.savedLocations.isEmpty)
+        else if (state.error != null && locations.isEmpty)
           _AddressError(
             message: state.error!,
             onRetry: () =>
                 ref.read(userLocationProvider.notifier).fetchSavedLocations(),
           )
-        else if (state.savedLocations.isEmpty)
-          _EmptyAddressPrompt(
-            onAdd: () => _openAddLocation(context, ref),
-          )
+        else if (locations.isEmpty)
+          _EmptyAddressPrompt(onAdd: _openAddLocation)
         else
           Column(
-            children: state.savedLocations.map((UserLocation location) {
+            children: locations.map((UserLocation location) {
               return _AddressOption(
+                key: ValueKey<String>(location.id),
                 location: location,
-                selectedId: selectedId,
+                selectedId: _selectedId,
                 isUpdating: state.isUpdating,
-                onSelect: () => _selectLocation(ref, location),
+                onSelect: () => _selectLocation(location),
               );
             }).toList(),
           ),
@@ -105,6 +143,7 @@ class OrderBagAddressSection extends ConsumerWidget {
 
 class _AddressOption extends StatelessWidget {
   const _AddressOption({
+    super.key,
     required this.location,
     required this.selectedId,
     required this.isUpdating,
