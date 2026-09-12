@@ -1,6 +1,6 @@
-# Drop n Fresh
+# Laundry Service
 
-**Drop n Fresh** is a Flutter mobile app for on-demand laundry, dry cleaning, and related pickup/delivery services. One codebase serves three roles: **Guests** (customers), **Couriers** (riders), and **Agents** (service providers).
+**Laundry Service** is a Flutter mobile app for on-demand laundry, dry cleaning, and related pickup/delivery services. One codebase serves three roles: **Guests** (customers), **Couriers** (riders), and **Agents** (service providers).
 
 Package name: `drop_n_fresh`  
 Android application ID: `com.dropnfresh.app`  
