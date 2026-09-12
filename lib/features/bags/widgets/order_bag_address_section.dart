@@ -1,0 +1,272 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/router/route_paths.dart';
+import '../../../app/theme/styles/app_text_styles.dart';
+import '../../../core/config/colors.dart';
+import '../../../core/config/sizes.dart';
+import '../../../shared/widgets/app_elevated_button.dart';
+import '../../../shared/widgets/app_outline_button.dart';
+import '../../home/user/notifier/default_location_notifier.dart';
+import '../../profile/model/user_location_model.dart';
+import '../../profile/notifier/user_location_notifier.dart';
+import '../../profile/state/user_location_state.dart';
+
+class OrderBagAddressSection extends ConsumerWidget {
+  const OrderBagAddressSection({super.key});
+
+  Future<void> _openAddLocation(BuildContext context, WidgetRef ref) async {
+    await context.push(RoutePaths.userAddressAdd);
+    if (!context.mounted) {
+      return;
+    }
+    await ref.read(userLocationProvider.notifier).refresh();
+    await ref.read(defaultLocationProvider.notifier).refresh();
+  }
+
+  Future<void> _selectLocation(WidgetRef ref, UserLocation location) async {
+    if (location.isDefault) {
+      return;
+    }
+    await ref.read(userLocationProvider.notifier).setDefaultLocation(
+      location.id,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final UserLocationState state = ref.watch(userLocationProvider);
+    final String? selectedId = state.savedLocations
+        .where((UserLocation location) => location.isDefault)
+        .firstOrNull
+        ?.id;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Text('Delivery address', style: AppTextStyles.heading5),
+            ),
+            TextButton.icon(
+              onPressed: () => _openAddLocation(context, ref),
+              icon: const Icon(
+                Icons.add_location_alt_outlined,
+                color: AppColors.primary,
+                size: AppSizes.iconMd,
+              ),
+              label: Text(
+                'Add',
+                style: AppTextStyles.heading5.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.sm),
+        if (state.isLoading && state.savedLocations.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSizes.md),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (state.error != null && state.savedLocations.isEmpty)
+          _AddressError(
+            message: state.error!,
+            onRetry: () =>
+                ref.read(userLocationProvider.notifier).fetchSavedLocations(),
+          )
+        else if (state.savedLocations.isEmpty)
+          _EmptyAddressPrompt(
+            onAdd: () => _openAddLocation(context, ref),
+          )
+        else
+          Column(
+            children: state.savedLocations.map((UserLocation location) {
+              return _AddressOption(
+                location: location,
+                selectedId: selectedId,
+                isUpdating: state.isUpdating,
+                onSelect: () => _selectLocation(ref, location),
+              );
+            }).toList(),
+          ),
+      ],
+    );
+  }
+}
+
+class _AddressOption extends StatelessWidget {
+  const _AddressOption({
+    required this.location,
+    required this.selectedId,
+    required this.isUpdating,
+    required this.onSelect,
+  });
+
+  final UserLocation location;
+  final String? selectedId;
+  final bool isUpdating;
+  final VoidCallback onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSelected = location.id == selectedId;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.sm),
+      child: Material(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: isUpdating ? null : onSelect,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.sm,
+              vertical: AppSizes.md,
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.body.withValues(alpha: 0.2),
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: <Widget>[
+                Radio<String>(
+                  value: location.id,
+                  // ignore: deprecated_member_use
+                  groupValue: selectedId,
+                  // ignore: deprecated_member_use
+                  onChanged: isUpdating ? null : (_) => onSelect(),
+                  activeColor: AppColors.primary,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                const SizedBox(width: AppSizes.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              location.name,
+                              style: AppTextStyles.heading5.copyWith(
+                                color: AppColors.title,
+                              ),
+                            ),
+                          ),
+                          if (isSelected) ...<Widget>[
+                            const SizedBox(width: AppSizes.sm),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.sm,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Selected',
+                                style: AppTextStyles.paragraph3.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSizes.xs),
+                      Text(
+                        location.address,
+                        style: AppTextStyles.paragraph1.copyWith(
+                          color: AppColors.body,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyAddressPrompt extends StatelessWidget {
+  const _EmptyAddressPrompt({required this.onAdd});
+
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Add an address so we can deliver your bag.',
+          style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
+        ),
+        const SizedBox(height: AppSizes.md),
+        AppElevatedButton(
+          label: 'Add address',
+          onPressed: onAdd,
+          icon: const Icon(
+            Icons.add_location_alt_outlined,
+            color: AppColors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AddressError extends StatelessWidget {
+  const _AddressError({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Could not load saved addresses.',
+          style: AppTextStyles.paragraph0.copyWith(color: AppColors.body),
+        ),
+        const SizedBox(height: AppSizes.xs),
+        Text(
+          message,
+          style: AppTextStyles.paragraph1.copyWith(color: AppColors.body),
+        ),
+        const SizedBox(height: AppSizes.md),
+        SizedBox(
+          width: 120,
+          child: AppOutlineButton(label: 'Retry', onPressed: onRetry),
+        ),
+      ],
+    );
+  }
+}

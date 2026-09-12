@@ -11,6 +11,14 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    final bool isRefreshRequest =
+        options.path.contains('refresh-token') ||
+        options.uri.path.contains('refresh-token');
+    if (isRefreshRequest) {
+      super.onRequest(options, handler);
+      return;
+    }
+
     final String? token = await secureStorage.read(StorageKeys.accessToken);
     final String? resetPasswordToken = await secureStorage.read(
       StorageKeys.resetPasswordToken,

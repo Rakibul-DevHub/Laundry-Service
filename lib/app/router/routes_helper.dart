@@ -56,8 +56,12 @@ class RoutesHelper {
     final AuthState authState = ref(authProvider);
 
     AppLogger().d(
-      'Role Guard isLoggedIn: ${authState.isLoggedIn}',
+      'Role Guard isLoggedIn: ${authState.isLoggedIn} || isInitialized: ${authState.isInitialized}',
     );
+
+    if (!authState.isInitialized) {
+      return RoutePaths.initial;
+    }
 
     if (!authState.isLoggedIn) {
       return RoutePaths.signIn;
@@ -99,12 +103,18 @@ class RoutesHelper {
 
     final Result Function<Result>(ProviderListenable<Result>) ref =
         ProviderScope.containerOf(context).read;
-    final bool isLoggedIn = ref(authProvider).isLoggedIn;
+    final AuthState authState = ref(authProvider);
     final String location = state.uri.path;
 
     AppLogger().d("GLOBAL REDIRECT location : $location");
 
-    // Allow public routes always
+    if (!authState.isInitialized) {
+      if (location == RoutePaths.initial || isPublicRoute(location)) {
+        return null;
+      }
+      return RoutePaths.initial;
+    }
+
     AppLogger().d(
       "GLOBAL REDIRECT publicRoutes contains : ${isPublicRoute(location)}",
     );
@@ -113,9 +123,8 @@ class RoutesHelper {
       return null;
     }
 
-    AppLogger().d("GLOBAL REDIRECT isLoggedIn : $isLoggedIn");
-    // Block private routes if not logged in
-    if (!isLoggedIn) {
+    AppLogger().d("GLOBAL REDIRECT isLoggedIn : ${authState.isLoggedIn}");
+    if (!authState.isLoggedIn) {
       return RoutePaths.signIn;
     }
 
